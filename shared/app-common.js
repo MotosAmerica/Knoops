@@ -188,6 +188,9 @@
   // ---------- Quiz module (reveal-and-explain) ----------
   function renderQuizModule(mod, container) {
     const results = {};
+    if (mod.intro) {
+      container.appendChild(el("p", "quiz-intro", mod.intro));
+    }
     mod.questions.forEach((q, qi) => {
       const box = el("div", "quiz-q");
       box.appendChild(el("div", "q-text", `${qi + 1}. ${q.q}`));
@@ -212,6 +215,9 @@
       box.appendChild(explain);
       container.appendChild(box);
     });
+    if (mod.note) {
+      container.appendChild(el("p", "quiz-note", mod.note));
+    }
     const doneBtn = el("button", "btn", "Mark module complete");
     doneBtn.onclick = () => {
       saveProgress(mod.id, true);
