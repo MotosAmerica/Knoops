@@ -205,8 +205,9 @@ window.ACADEMY_DATA = {
       id: 7, title: "The Second Ask", type: "reading",
       summary: "Inviting someone back, genuinely, without a script or a pitch.",
       screens: [
-        { heading: "Why this moment matters", blocks: [
-          { type: "para", text: "The visit is basically over by this point — which is exactly why it's the easiest moment to get wrong. A genuine invitation back costs nothing and can turn a one-time visitor into a regular; a pushy one undoes some of the goodwill the whole rest of the visit just built." },
+        { heading: "The real problem this solves: nobody knows the loyalty app exists", blocks: [
+          { type: "para", text: "Loyalty and rewards programs at counter-serve chains have a well-known failure mode: most customers never hear about them at all, because staff either never mention it or mention it in a flat, scripted way that reads as a pitch and gets tuned out. The program itself isn't the problem — the moment it gets mentioned is." },
+          { type: "para", text: "The visit is basically over by this point — which is exactly why it's the easiest moment to get wrong in either direction: silence loses a customer who would've genuinely wanted to know, and a pushy pitch undoes some of the goodwill the whole rest of the visit just built. A genuine invitation back costs nothing and can turn a one-time visitor into a regular." },
         ]},
         { heading: "A genuine version", blocks: [
           { type: "dialogue", lines: [

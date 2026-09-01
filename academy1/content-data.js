@@ -114,14 +114,22 @@ window.ACADEMY_DATA = {
       type: "reading",
       summary: "Same story, different street — and what 'local' means for this specific store.",
       screens: [
-        { heading: "Same story, different street", blocks: [
-          { type: "para", text: "Rye, London, York, Dubai, Salt Lake City — every Knoops store started from the same idea. What differs, store to store, is the community each one actually sits inside of." },
+        { heading: "The real problem this solves: feeling like \"just another chain\"", blocks: [
+          { type: "para", text: "As any brand grows past a couple dozen locations, a specific thing tends to happen to how customers talk about it: it starts feeling identical everywhere — competent, but generic, the kind of place people use out of convenience rather than actually love. That shift is one of the quiet reasons growing chains lose the word-of-mouth energy a single beloved local shop has by default. Knoops is now past 30 locations across three countries — this module exists because that risk is real, not hypothetical." },
+          { type: "para", text: "It matters even more at a brand-new location: a store's first months are exactly when local word-of-mouth either forms or doesn't, and a counter that feels like it belongs to the neighborhood earns that faster than one that feels shipped in from headquarters." },
         ]},
         { heading: "What 'part of the community' means here", blocks: [
           { type: "para", text: "Jens has talked about wanting every store to work with local producers — not as a marketing checkbox, but because a store genuinely becomes part of the neighborhood it's in, the same way the original Rye shop was part of Rye. That can mean a local bakery supplying pastries, a nearby roaster for the coffee side of the menu, or something as simple as knowing the other independent shops on the same street." },
           { type: "placeholder", text: "this store's specific local partnerships/connections — to be filled in once documented" },
-          { type: "para", text: "What doesn't wait: the biggest local connection any store has is the people working the counter. A regular comes back because a specific person recognized them — that's the realest version of 'local' there is, and it's true on day one at a brand-new store just as much as it is at the Rye original." },
-          { type: "do", text: "Name one thing — a nearby business, an event, a neighborhood habit — that makes your specific store's location distinct from every other Knoops. If you're not sure yet, ask a teammate who's been there longer." },
+        ]},
+        { heading: "The one thing that doesn't wait for a partnership to exist", blocks: [
+          { type: "para", text: "The biggest local connection any store has, right now, with zero setup required, is the people working the counter. A regular comes back because a specific person recognized them — that's the realest version of 'local' there is, it costs nothing, and it's true on day one at a brand-new store just as much as it is at the Rye original." },
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "(third visit this week) Same as always, please." },
+            { speaker: "Knoopologist", text: "The 55% hazelnut, right? Coming up — good to see you again." },
+          ]},
+          { type: "para", text: "That one line — remembering an order, using it without being asked — is the actual mechanism that makes a chain location feel like a neighborhood spot instead of an interchangeable outpost. It's a habit, not a program." },
+          { type: "do", text: "Name one thing — a nearby business, an event, a neighborhood habit — that makes your specific store's location distinct from every other Knoops. If you're not sure yet, ask a teammate who's been there longer. Then name one regular customer whose order you could start remembering this week." },
         ]},
       ],
     },
