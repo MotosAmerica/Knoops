@@ -76,6 +76,18 @@ This session can't push to GitHub directly (no linked computer / gh auth in this
 ### 9. (Later, not urgent) The live sign-off workflow
 - The `signoffs` table exists in the schema, but there's no UI for a Store Trainer to actually record one yet — that's real remaining platform work, not urgent for the initial blind-build demo to Greg, but worth planning before this becomes the real, in-use tool at Knoops.
 
+## Interactive "Do — Practice" (voice + AI grading)
+
+Every `Do — practice` prompt across the reading modules is a real interactive rep, not a text box that goes nowhere:
+
+- **Speak or type.** Phone-first: a big mic button is the primary input, the keyboard is the fallback. Transcription happens **on-device** via the browser's own speech recognition — no audio leaves the phone, no transcription API key, no per-minute cost. The transcript lands in an editable box so a mis-heard word can be fixed before submitting. Browsers without speech support (mainly Firefox) simply get the text box; nothing else changes.
+- **AI grades it 1-5** via the `knoops-academy-ai` edge function (`action: "grade"`). Grounding order is deliberate: **Jens' own sourced quotes first** (the same `academy_content` rows the Ask widget uses), then general hospitality/food-service knowledge, but only ever anchored to verified Knoops facts. The grader is explicitly forbidden from inventing a Knoops fact, menu item, policy, or Jens quote.
+- **Rubric is generous but honest** — a 3 is "solid, would work on the floor." The prompt requires naming something specific the trainee did well before any suggestion, and the suggestion has to be actionable (something they could actually say differently). This is training for someone possibly in their first week, not an exam board.
+- **Scores are feedback, not a gate.** A low score never blocks module completion — it just gives the trainee a next step and gives a Store Trainer something real to coach against.
+- **Retry is unlimited and encouraged** — every attempt is stored, the newest is what shows.
+- **Recorded to `practice_responses`** (score, feedback, response text, and whether it was spoken or typed) and cached per-device in `localStorage`, so a graded answer survives a page reload and the whole thing still works if Supabase is unreachable.
+- **Surfaced in the tracker**: average practice score and total reps logged as headline stats, plus a per-person Practice column showing their average, rep count, and how many were spoken aloud.
+
 ## Sign-in & the manager tracker
 
 - **Trainee sign-in** (`shared/signin.js`) shows once per device — name, store (dropdown from `shared/knoops-stores.js`, the real Knoops locations), and role. No password. The record is cached in `localStorage` so someone isn't asked again on the same device, and written to the `trainees` table so a manager can see it. "Sign out" in the topbar clears the local cache (useful for a shared/shop device where multiple people sign in over time).

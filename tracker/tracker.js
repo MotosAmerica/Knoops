@@ -43,9 +43,20 @@
     return academies.reduce((sum, a) => sum + ACADEMY_CONFIG[a].modules, 0);
   }
 
+  // This page deliberately doesn't load signin.js (it has no sign-in of its
+  // own), so it can't read KnoopsSignIn.ROLES — keep a local label map and
+  // fall back to prettifying the raw value rather than showing "store_trainer".
+  const ROLE_LABELS = {
+    knoopologist: "Knoopologist",
+    shift_lead: "Shift Lead",
+    store_trainer: "Store Trainer",
+    store_manager: "Store Manager",
+    district_manager: "District / Regional Manager",
+  };
   function roleLabel(role) {
-    const found = (window.KnoopsSignIn && window.KnoopsSignIn.ROLES || []).find((r) => r.value === role);
-    return found ? found.label : (role || "Knoopologist");
+    if (!role) return "Knoopologist";
+    if (ROLE_LABELS[role]) return ROLE_LABELS[role];
+    return String(role).replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   async function init() {
@@ -57,12 +68,13 @@
       return;
     }
 
-    let trainees, progress, attempts;
+    let trainees, progress, attempts, practice;
     try {
-      [trainees, progress, attempts] = await Promise.all([
+      [trainees, progress, attempts, practice] = await Promise.all([
         fetchTable("trainees", "id,name,store_location,role,created_at"),
         fetchTable("module_progress", "trainee_id,academy,module_num,completed_at"),
         fetchTable("quiz_attempts", "trainee_id,academy,module_num,score,passed,created_at"),
+        fetchTable("practice_responses", "trainee_id,academy,module_num,score,input_mode,created_at"),
       ]);
     } catch (e) {
       wrap.innerHTML = "";
@@ -75,8 +87,15 @@
     progress.forEach((p) => {
       (progressByTrainee[p.trainee_id] = progressByTrainee[p.trainee_id] || []).push(p);
     });
+    // Practice: how many prompts they've actually spoken/written an answer to,
+    // and how those were graded. Counts every attempt — retries are the point.
+    const practiceByTrainee = {};
+    (practice || []).forEach((p) => {
+      (practiceByTrainee[p.trainee_id] = practiceByTrainee[p.trainee_id] || []).push(p);
+    });
+
     const lastActiveByTrainee = {};
-    progress.concat(attempts).forEach((row) => {
+    progress.concat(attempts, practice || []).forEach((row) => {
       const ts = row.completed_at || row.created_at;
       if (!ts) return;
       if (!lastActiveByTrainee[row.trainee_id] || ts > lastActiveByTrainee[row.trainee_id]) {
@@ -90,12 +109,20 @@
       const completedCount = done.length;
       const byAcademy = {};
       done.forEach((d) => { byAcademy[d.academy] = (byAcademy[d.academy] || 0) + 1; });
+      const myPractice = practiceByTrainee[t.id] || [];
+      const graded = myPractice.filter((p) => typeof p.score === "number");
+      const avgPractice = graded.length
+        ? Math.round((graded.reduce((s, p) => s + p.score, 0) / graded.length) * 10) / 10
+        : null;
       return {
         ...t,
         completedCount,
         total,
         pct: total ? Math.round((completedCount / total) * 100) : 0,
         byAcademy,
+        practiceCount: myPractice.length,
+        practiceVoiceCount: myPractice.filter((p) => p.input_mode === "voice").length,
+        avgPractice,
         lastActive: lastActiveByTrainee[t.id] || t.created_at,
       };
     });
@@ -116,11 +143,18 @@
     const avgPct = totalTrainees ? Math.round(rows.reduce((s, r) => s + r.pct, 0) / totalTrainees) : 0;
     const certified = rows.filter((r) => r.pct >= 100).length;
     const stores = new Set(rows.map((r) => r.store_location)).size;
+    const withPractice = rows.filter((r) => r.avgPractice !== null);
+    const avgPractice = withPractice.length
+      ? (withPractice.reduce((s, r) => s + r.avgPractice, 0) / withPractice.length).toFixed(1)
+      : "—";
+    const practiceReps = rows.reduce((s, r) => s + r.practiceCount, 0);
     [
       { num: totalTrainees, label: "Signed in" },
       { num: `${avgPct}%`, label: "Avg. completion" },
       { num: certified, label: "Fully certified" },
       { num: stores, label: "Stores represented" },
+      { num: avgPractice, label: "Avg. practice score" },
+      { num: practiceReps, label: "Practice reps logged" },
     ].forEach((s) => {
       const box = el("div", "tracker-stat");
       box.appendChild(el("div", "num", s.num));
@@ -168,12 +202,16 @@
     const table = document.createElement("table");
     table.className = "tracker-table";
     table.innerHTML = `<thead><tr>
-      <th>Name</th><th>Store</th><th>Role</th><th>Progress</th><th>Last active</th>
+      <th>Name</th><th>Store</th><th>Role</th><th>Progress</th><th>Practice</th><th>Last active</th>
     </tr></thead>`;
     const tbody = document.createElement("tbody");
     filtered.forEach((r) => {
       const tr = document.createElement("tr");
       const lastActive = r.lastActive ? new Date(r.lastActive).toLocaleDateString() : "—";
+      const practiceCell = r.practiceCount
+        ? `<strong>${r.avgPractice !== null ? r.avgPractice : "—"}</strong>${r.avgPractice !== null ? "<span style=\"color:#999\">/5</span>" : ""}
+           <div style="font-size:0.78rem;color:#777;margin-top:4px;">${r.practiceCount} rep${r.practiceCount === 1 ? "" : "s"}${r.practiceVoiceCount ? ` · ${r.practiceVoiceCount} spoken` : ""}</div>`
+        : `<span style="color:#999">—</span>`;
       tr.innerHTML = `
         <td>${escapeHtml(r.name)}</td>
         <td>${escapeHtml(r.store_location || "—")}</td>
@@ -182,6 +220,7 @@
           <div class="tracker-bar-wrap"><div class="tracker-bar" style="width:${r.pct}%"></div></div>
           <div style="font-size:0.78rem;color:#777;margin-top:4px;">${r.completedCount}/${r.total} modules (${r.pct}%)</div>
         </td>
+        <td>${practiceCell}</td>
         <td>${lastActive}</td>`;
       tbody.appendChild(tr);
     });

@@ -162,6 +162,75 @@ a { color: var(--knoops-brown); }
   padding: 10px 14px; font-size: 0.85rem; color: #6b4a1c; margin: 12px 0;
 }
 
+/* ---------- Interactive "Do — Practice" (voice-first, AI graded) ---------- */
+.practice-card .practice-prompt { margin: 8px 0 14px; }
+.practice-controls { display: flex; flex-direction: column; gap: 10px; }
+
+.practice-mic {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; min-height: 56px; /* comfortable thumb target on a phone */
+  border: none; border-radius: var(--radius-md);
+  background: var(--knoops-brown); color: #fff;
+  font-family: var(--knoops-font); font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: background 0.15s ease, transform 0.05s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.practice-mic:hover { background: #7A4224; }
+.practice-mic:active { transform: scale(0.99); }
+.practice-mic .mic-icon { font-size: 1.25rem; line-height: 1; }
+.practice-mic.listening { background: #B3402B; animation: practice-pulse 1.4s ease-in-out infinite; }
+@keyframes practice-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(179, 64, 43, 0.45); }
+  50%      { box-shadow: 0 0 0 12px rgba(179, 64, 43, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-mic.listening { animation: none; }
+}
+
+.practice-input {
+  width: 100%; min-height: 84px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(18,18,18,0.15); padding: 10px;
+  font-family: var(--knoops-font); font-size: 1rem; /* 1rem avoids iOS zoom-on-focus */
+  box-sizing: border-box; resize: vertical;
+}
+
+.practice-actions {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px;
+}
+.practice-submit {
+  border: none; border-radius: var(--radius-sm); padding: 12px 20px; min-height: 44px;
+  background: var(--knoops-ink); color: #fff; font-family: var(--knoops-font);
+  font-size: 0.95rem; font-weight: 600; cursor: pointer;
+}
+.practice-submit:disabled { opacity: 0.5; cursor: default; }
+.practice-status { font-size: 0.85rem; color: #5a5a5a; }
+.practice-status.warn { color: #8a3d22; }
+
+.practice-result {
+  margin-top: 16px; padding: 14px 16px; background: #fff;
+  border: 1px solid rgba(18,18,18,0.1); border-radius: var(--radius-sm);
+}
+.practice-score { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.practice-score-label {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--knoops-brown);
+}
+.practice-pips { display: flex; gap: 6px; }
+.practice-pip {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.8rem; font-weight: 700;
+  background: rgba(18,18,18,0.08); color: rgba(18,18,18,0.35);
+}
+.practice-pip.filled { background: var(--knoops-brown); color: #fff; }
+.practice-feedback { margin: 0 0 12px; font-size: 0.95rem; line-height: 1.55; }
+.practice-retry {
+  background: none; border: 1px solid var(--knoops-brown); color: var(--knoops-brown);
+  border-radius: var(--radius-sm); padding: 9px 16px; min-height: 40px;
+  font-family: var(--knoops-font); font-size: 0.88rem; font-weight: 600; cursor: pointer;
+}
+.practice-retry:hover { background: rgba(154, 83, 46, 0.08); }
+
 /* ---------- Ask the Founder / Ask This Manual widget ---------- */
 .ask-widget { background: var(--knoops-ink); color: var(--knoops-white); border-radius: var(--radius-lg); padding: 24px; margin: 20px 0; }
 .ask-widget h3 { margin-top: 0; color: var(--knoops-tan); }

@@ -63,6 +63,107 @@ ${groundingText}
 Keep answers warm, conversational, and under 120 words.`;
 }
 
+// ---------------------------------------------------------------------------
+// "Do — Practice" grading.
+//
+// Grounding order, per Doug's spec: Jens' own sourced words FIRST (the same
+// academy_content rows the Ask widget uses), then general food-service /
+// hospitality knowledge — but only ever anchored to what we actually know
+// about Knoops. The grader never invents a Knoops fact or a Jens quote.
+//
+// Deliberately generous-but-honest: this is training for frontline staff, not
+// an exam board. A 3 is "solid, would work on the floor." Scores exist to give
+// someone a next step, not to rank them.
+// ---------------------------------------------------------------------------
+function buildGradingPrompt(
+  academy: string,
+  moduleTitle: string,
+  promptText: string,
+  rows: any[],
+) {
+  const groundingText = rows
+    .map((r) => `- [${r.topic}] ${r.content} (Source: ${r.source})`)
+    .join("\n");
+
+  return `You are a Store Trainer for Knoops, a premium hot chocolate retailer,
+grading a Knoopologist's practice answer inside Knoops Academy.
+
+CONTEXT
+Academy: ${academy}
+Module: ${moduleTitle || "(untitled)"}
+The practice prompt they were answering: "${promptText}"
+
+WHAT KNOOPS ACTUALLY IS (ground yourself here first — these are the founder's
+own sourced words and real, verified company facts; treat them as the primary
+standard the answer is being measured against):
+${groundingText}
+
+Beyond that list you MAY use general, well-established hospitality and
+counter-serve food-service knowledge — but only in service of Knoops' own
+standard above. Never invent a Knoops fact, a menu item, a policy, or a
+quote attributed to Jens Knoop. If the trainee's answer references something
+about Knoops you cannot verify from the list, don't penalise them for it and
+don't confirm it either — focus your feedback on the skill being practised.
+
+SCORING RUBRIC (1-5)
+5 — Genuinely excellent. Natural, specific, sounds like a real person at a real
+    counter, and clearly demonstrates the skill the prompt was teaching.
+4 — Strong. Does the job well; one small thing would sharpen it.
+3 — Solid. Would work fine on the floor. Missing some warmth, specificity, or
+    one element of the skill being practised.
+2 — On the right track but thin — generic, very short, or missing the point of
+    the prompt.
+1 — Doesn't engage with the prompt, or would not work with a real customer.
+
+Be encouraging and concrete. Never sarcastic, never harsh. This person may be
+on their first week. Always name one specific thing they did well before any
+suggestion, and make the suggestion actionable (something they could say or do
+differently), not abstract.
+
+Respond with ONLY a valid JSON object, no markdown fences, in exactly this shape:
+{"score": <integer 1-5>, "feedback": "<2-3 warm, specific sentences, under 70 words>"}`;
+}
+
+async function gradePractice(body: any, rows: any[]) {
+  const { academy, moduleTitle, prompt, response } = body;
+  const systemPrompt = buildGradingPrompt(academy, moduleTitle, prompt, rows);
+
+  const aiResp = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": ANTHROPIC_API_KEY,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: "claude-sonnet-4-5",
+      max_tokens: 300,
+      system: systemPrompt,
+      messages: [{
+        role: "user",
+        content: `Here is the trainee's practice answer. Grade it.\n\n"""\n${response}\n"""`,
+      }],
+    }),
+  });
+  const aiJson = await aiResp.json();
+  const textBlock = (aiJson.content || []).find((b: any) => b.type === "text");
+  const raw = textBlock ? textBlock.text.trim() : "";
+
+  // The model is told to return bare JSON, but strip fences defensively.
+  const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
+  try {
+    const parsed = JSON.parse(cleaned);
+    const score = Math.max(1, Math.min(5, parseInt(parsed.score, 10) || 3));
+    return { score, feedback: String(parsed.feedback || "").slice(0, 800) };
+  } catch (_e) {
+    // Never block a trainee on a parsing failure — give a neutral, honest result.
+    return {
+      score: 3,
+      feedback: "Thanks for practising this one. The grader had trouble scoring this response — your answer was still saved, and it's worth running past your Store Trainer.",
+    };
+  }
+}
+
 serve(async (req) => {
   const corsHeaders = {
     "Access-Control-Allow-Origin": "*",
@@ -71,7 +172,24 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
-    const { academy, module, question } = await req.json();
+    const body = await req.json();
+    const { academy, module, question, action } = body;
+
+    // ---- "Do — Practice" grading path ----
+    if (action === "grade") {
+      if (!academy || !body.prompt || !body.response) {
+        return new Response(
+          JSON.stringify({ error: "academy, prompt and response are required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
+      const rows = await getAcademyContent("academy1"); // Jens' quotes live here
+      const result = await gradePractice(body, rows);
+      return new Response(JSON.stringify(result), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     if (!academy || !question) {
       return new Response(JSON.stringify({ error: "academy and question are required" }), {
         status: 400,

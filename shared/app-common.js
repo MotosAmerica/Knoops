@@ -91,8 +91,248 @@
     });
   }
 
+  // ---------- "Do — Practice": speak or type, AI-graded 1-5 ----------
+  // Designed phone-first: most Knoopologists will do this on a handset, often
+  // on a break, so the primary input is the mic and the keyboard is the
+  // fallback (not the other way round).
+  //
+  // Speech is transcribed on-device by the browser's own speech recognition —
+  // no audio ever leaves the phone, no transcription API key, no per-minute
+  // cost. The transcript lands in an editable box so a mis-heard word can be
+  // fixed before submitting. Browsers without it (mainly Firefox) just get the
+  // text box, and nothing else about the flow changes.
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function practiceCacheKey(ctx, promptKey) {
+    return `knoops_practice_${DATA.slug}_${ctx.moduleId}_${promptKey}`;
+  }
+
+  function loadCachedPractice(ctx, promptKey) {
+    try {
+      return JSON.parse(localStorage.getItem(practiceCacheKey(ctx, promptKey)) || "null");
+    } catch (e) { return null; }
+  }
+  function cachePractice(ctx, promptKey, payload) {
+    try {
+      localStorage.setItem(practiceCacheKey(ctx, promptKey), JSON.stringify(payload));
+    } catch (e) { /* best-effort */ }
+  }
+
+  function savePracticeToSupabase(ctx, promptKey, promptText, responseText, mode, result) {
+    const c = window.KNOOPS_CONFIG || {};
+    const signIn = window.KnoopsSignIn;
+    if (!c.SUPABASE_URL || !signIn) return;
+    const trainee = signIn.getTrainee();
+    if (!trainee || trainee._local || String(trainee.id).indexOf("local-") === 0) return;
+    fetch(`${c.SUPABASE_URL}/rest/v1/practice_responses`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "apikey": c.SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
+        "Prefer": "return=minimal",
+      },
+      body: JSON.stringify([{
+        trainee_id: trainee.id,
+        academy: DATA.slug,
+        module_num: ctx.moduleId,
+        prompt_key: promptKey,
+        prompt_text: promptText,
+        response_text: responseText,
+        input_mode: mode,
+        score: result ? result.score : null,
+        feedback: result ? result.feedback : null,
+      }]),
+    }).catch(() => {});
+  }
+
+  function renderScorePips(score) {
+    const wrap = el("div", "practice-score");
+    wrap.appendChild(el("span", "practice-score-label", "Score"));
+    const pips = el("div", "practice-pips");
+    for (let i = 1; i <= 5; i++) {
+      const pip = el("span", "practice-pip" + (i <= score ? " filled" : ""), String(i));
+      pips.appendChild(pip);
+    }
+    wrap.appendChild(pips);
+    return wrap;
+  }
+
+  function renderPracticeBlock(block, ctx) {
+    ctx = ctx || { moduleId: 0, moduleTitle: "", screenIdx: 0 };
+    const promptKey = `${ctx.screenIdx}-${ctx.blockIdx}`;
+
+    const wrap = el("div", "do-prompt practice-card");
+    wrap.appendChild(el("div", "tag", "Do — practice"));
+    wrap.appendChild(el("p", "practice-prompt", block.text));
+
+    // --- input row: mic (primary) + textarea (fallback/edit) ---
+    const controls = el("div", "practice-controls");
+    const ta = document.createElement("textarea");
+    ta.className = "practice-input";
+    ta.placeholder = SpeechRec
+      ? "Tap the mic and just say your answer — or type it here."
+      : "Type your answer here.";
+
+    let recognizer = null;
+    let listening = false;
+    let usedVoice = false;
+
+    if (SpeechRec) {
+      const micBtn = el("button", "practice-mic");
+      micBtn.type = "button";
+      micBtn.innerHTML = `<span class="mic-icon">🎙</span><span class="mic-label">Tap to answer out loud</span>`;
+
+      const setListening = (on) => {
+        listening = on;
+        micBtn.classList.toggle("listening", on);
+        micBtn.querySelector(".mic-label").textContent = on
+          ? "Listening… tap to stop"
+          : "Tap to answer out loud";
+      };
+
+      micBtn.addEventListener("click", () => {
+        if (listening && recognizer) { recognizer.stop(); return; }
+        try {
+          recognizer = new SpeechRec();
+        } catch (e) {
+          micBtn.style.display = "none";
+          return;
+        }
+        recognizer.lang = navigator.language || "en-GB";
+        recognizer.interimResults = true;
+        recognizer.continuous = true;
+        let finalText = ta.value ? ta.value + " " : "";
+
+        recognizer.onresult = (ev) => {
+          let interim = "";
+          for (let i = ev.resultIndex; i < ev.results.length; i++) {
+            const chunk = ev.results[i][0].transcript;
+            if (ev.results[i].isFinal) { finalText += chunk + " "; usedVoice = true; }
+            else interim += chunk;
+          }
+          ta.value = (finalText + interim).replace(/\s+/g, " ").trimStart();
+        };
+        recognizer.onerror = (ev) => {
+          setListening(false);
+          if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
+            status.textContent = "Mic access is blocked — you can type your answer instead.";
+            status.className = "practice-status warn";
+          }
+        };
+        recognizer.onend = () => setListening(false);
+
+        try { recognizer.start(); setListening(true); } catch (e) { setListening(false); }
+      });
+
+      controls.appendChild(micBtn);
+    }
+
+    controls.appendChild(ta);
+    wrap.appendChild(controls);
+
+    const actions = el("div", "practice-actions");
+    const submitBtn = el("button", "practice-submit", "Get feedback");
+    submitBtn.type = "button";
+    actions.appendChild(submitBtn);
+    const status = el("span", "practice-status", "");
+    actions.appendChild(status);
+    wrap.appendChild(actions);
+
+    const resultBox = el("div", "practice-result");
+    resultBox.style.display = "none";
+    wrap.appendChild(resultBox);
+
+    function showResult(result, responseText) {
+      resultBox.innerHTML = "";
+      resultBox.appendChild(renderScorePips(result.score));
+      resultBox.appendChild(el("p", "practice-feedback", result.feedback));
+      const again = el("button", "practice-retry", "Try it again");
+      again.type = "button";
+      again.addEventListener("click", () => {
+        resultBox.style.display = "none";
+        ta.value = "";
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Get feedback";
+        status.textContent = "";
+        ta.focus();
+      });
+      resultBox.appendChild(again);
+      resultBox.style.display = "block";
+      cachePractice(ctx, promptKey, { response: responseText, result });
+    }
+
+    // Restore a previous attempt on this device
+    const cached = loadCachedPractice(ctx, promptKey);
+    if (cached && cached.result) {
+      ta.value = cached.response || "";
+      showResult(cached.result, cached.response);
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Graded";
+    }
+
+    submitBtn.addEventListener("click", () => {
+      const text = ta.value.trim();
+      if (text.length < 5) {
+        status.textContent = "Say or write a little more first.";
+        status.className = "practice-status warn";
+        return;
+      }
+      if (listening && recognizer) recognizer.stop();
+
+      const c = window.KNOOPS_CONFIG || {};
+      if (!c.SUPABASE_URL) {
+        // No backend configured — still keep the answer, be honest about it.
+        status.textContent = "Saved on this device. AI feedback needs the backend connected.";
+        status.className = "practice-status";
+        cachePractice(ctx, promptKey, { response: text, result: null });
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Reading your answer…";
+      status.textContent = "";
+      status.className = "practice-status";
+
+      fetch(`${c.SUPABASE_URL}/functions/v1/knoops-academy-ai`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          action: "grade",
+          academy: DATA.slug,
+          module: ctx.moduleId,
+          moduleTitle: ctx.moduleTitle,
+          prompt: block.text,
+          response: text,
+        }),
+      })
+        .then((r) => r.json())
+        .then((data) => {
+          if (!data || typeof data.score === "undefined") throw new Error("bad response");
+          showResult(data, text);
+          submitBtn.textContent = "Graded";
+          savePracticeToSupabase(
+            ctx, promptKey, block.text, text, usedVoice ? "voice" : "text", data
+          );
+        })
+        .catch(() => {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "Get feedback";
+          status.textContent = "Couldn't reach the grader just now — your answer is saved, try again in a moment.";
+          status.className = "practice-status warn";
+          cachePractice(ctx, promptKey, { response: text, result: null });
+          savePracticeToSupabase(ctx, promptKey, block.text, text, usedVoice ? "voice" : "text", null);
+        });
+    });
+
+    return wrap;
+  }
+
   // ---------- Block renderers ----------
-  function renderBlock(block) {
+  function renderBlock(block, ctx) {
     switch (block.type) {
       case "quote":
         return el("blockquote", "", block.text);
@@ -107,15 +347,8 @@
         });
         return wrap;
       }
-      case "do": {
-        const wrap = el("div", "do-prompt");
-        wrap.appendChild(el("div", "tag", "Do — practice"));
-        wrap.appendChild(el("p", "", block.text));
-        const ta = document.createElement("textarea");
-        ta.placeholder = "Write your response here (saved on this device only)...";
-        wrap.appendChild(ta);
-        return wrap;
-      }
+      case "do":
+        return renderPracticeBlock(block, ctx);
       case "placeholder":
         return el("div", "placeholder-flag", `⚠ Placeholder — ${block.text}`);
       case "list": {
@@ -133,7 +366,12 @@
     mod.screens.forEach((screen, idx) => {
       const s = el("div", "screen");
       s.appendChild(el("h2", "", `${idx + 1}. ${screen.heading}`));
-      screen.blocks.forEach((b) => s.appendChild(renderBlock(b)));
+      screen.blocks.forEach((b, bIdx) => s.appendChild(renderBlock(b, {
+        moduleId: mod.id,
+        moduleTitle: mod.title,
+        screenIdx: idx,
+        blockIdx: bIdx,
+      })));
       container.appendChild(s);
     });
     const doneBtn = el("button", "btn", "Mark module complete");
