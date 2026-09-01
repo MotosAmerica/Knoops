@@ -35,16 +35,40 @@ window.ACADEMY_DATA = {
       ]}],
     },
     {
-      id: 4, title: "Flavor Pairing Reference", type: "reading",
-      summary: "A directional, illustrative guide — not the official pairing chart.",
-      screens: [{ heading: "A starting reference, not the final word", blocks: [
-        { type: "para", text: "A general, directional flavor pairing guide, built from what's publicly known about Knoops' menu style — genuinely useful as a starting reference, but explicitly illustrative rather than the official, complete pairing guide, which should replace this once available." },
-        { type: "list", items: [
-          "Classic pairings — vanilla, caramel, hazelnut: safe, well-loved starting points for recommendations to first-timers (ties to Academy 2, Module 3's \"confident suggestion\" technique)",
-          "Bolder/exotic pairings — chili, orange, sea salt: better suited to customizers or regulars looking to try something new (ties to Academy 2, Module 2's customer-reading)",
+      id: 4, title: "The Real Menu — Origins, Extras & Milk", type: "reading",
+      summary: "Real, public menu data — percentages, origins, tasting notes, and the full extras list.",
+      screens: [
+        { heading: "Percentages have real origins and real tasting notes", blocks: [
+          { type: "para", text: "This isn't illustrative — this is the actual public Knoops menu. Every strength is tied to a specific origin and a specific tasting note, and knowing a few of these by name is what turns \"pick a number\" into the sommelier-style recommendation Academy 2 teaches." },
+          { type: "list", items: [
+            "60% (Venezuela) — tropical fruit, walnuts & spices",
+            "68% (Madagascar) — raspberry & grapefruit notes",
+            "54% (blend) — the house all-rounder, made to work with any milk, any mix-in, any format (hot, iced, frozen, milkshake) — Jens' own words, see Academy 1's \"Ask the Founder\"",
+            "100% (blend & Philippines) — the no-added-sugar option, for a customer who wants pure cacao intensity",
+          ]},
+          { type: "para", text: "There are 22 hot strengths and 6 iced strengths total on the real menu — this list is a representative sample worth knowing cold, not the complete chart. The complete chart is the same one on the counter/register." },
         ]},
-        { type: "placeholder", text: "the complete, official flavor pairing guide, including any seasonal or region-specific offerings — to be added once available" },
-      ]}],
+        { heading: "The full flavor extras list", blocks: [
+          { type: "para", text: "Real, current extras — organized the way they'd actually come up in a customer conversation." },
+          { type: "list", items: [
+            "Spices — salt, black pepper, pink pepper, pimentón, Szechuan pepper, chilli, nutmeg, turmeric, star anise, cardamom, cinnamon",
+            "Botanicals — rosemary, mint, thyme, lavender, orange, lemon, lime, ginger",
+            "Toppings — handmade marshmallows, whipped cream, vegan whipped cream, matcha",
+          ]},
+          { type: "para", text: "Jens' own everyday order is a real example worth knowing: a frozen mocha most mornings, and a hot chocolate with star anise and sea salt in the evening — the 54%, his own \"transitional\" strength for someone exploring past milk chocolate." },
+        ]},
+        { heading: "Milk options — the full real list", blocks: [
+          { type: "list", items: [
+            "Dairy — whole, semi-skimmed, skimmed, lacto-free",
+            "Plant-based — oat, almond, soya, coconut, hazelnut",
+          ]},
+          { type: "para", text: "That's five plant-based options, not just \"oat vs. dairy\" — worth knowing by name for a customer who asks what's available beyond oat milk." },
+        ]},
+        { heading: "What's still placeholder here", blocks: [
+          { type: "para", text: "The menu facts above are real and public — safe to teach as-is. What's still placeholder is the internal side: exact portioning/ratios to hit each strength consistently, and any store-specific technique. That's Module 2 and 3 above, and it's still waiting on Greg's real specs." },
+          { type: "placeholder", text: "any seasonal or limited-time flavor offerings, and region-specific menu differences (UK / UAE / US) — to be added once available" },
+        ]},
+      ],
     },
     {
       id: 5, title: "This Academy Will Grow", type: "reading",

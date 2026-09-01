@@ -46,6 +46,7 @@ window.ACADEMY_DATA = {
         "What makes Knoops chocolate different?",
         "Where does the chocolate actually come from?",
         "What do you want a customer to feel when they walk in?",
+        "What's the 54% and why is it special?",
       ],
       groundingTable: [
         { topic: "Origin / why he started", quote: "Couldn't find a genuinely good hot chocolate anywhere in London, not even in the big coffee chains — winter 2012.", source: "Oxford Student", sourceUrl: "https://www.oxfordstudent.com/2024/11/24/in-conversation-with-jens-knoop/" },
@@ -57,6 +58,8 @@ window.ACADEMY_DATA = {
         { topic: "Community / local connection", quote: "Wants every store to incorporate local producers because we are part of their community.", source: "Utah Business", sourceUrl: "https://www.utahbusiness.com/industry/2026/08/12/uk-based-hot-chocolate-sommelier-jens-knoop-knoops-slc-utah-american-debut/" },
         { topic: "Best feedback he's had", quote: "Customers who walked out, then came back in just to say 'this is the best thing I ever had.'", source: "Utah Business", sourceUrl: "https://www.utahbusiness.com/industry/2026/08/12/uk-based-hot-chocolate-sommelier-jens-knoop-knoops-slc-utah-american-debut/" },
         { topic: "Continuous improvement", quote: "We are improving every day based on customer feedback, with small and big changes being implemented all the time.", source: "About Time Magazine", sourceUrl: "https://www.abouttimemagazine.co.uk/life/about-time-you-met-jens-knoop-founder-of-knoops/" },
+        { topic: "Why the 54% exists", quote: "It was made to my own specification and turned out to be a beautiful all-rounder, working well with any milk, any mix-in, any format: hot, iced, frozen, milkshake.", source: "Knoops Stories — \"The Story Behind our 54%\"", sourceUrl: "https://knoops.com/blogs/knoops-stories/the-story-behind-our-54" },
+        { topic: "Real chocolate, no substitutes", quote: "Real chocolate, made with ingredients our ancestors would recognise. No artificial flavourings, no substitutes.", source: "Knoops Stories — \"World Chocolate Day\"", sourceUrl: "https://knoops.com/blogs/knoops-stories/world-chocolate-day-chocolate-was-made-for-drinking" },
       ],
     },
     {

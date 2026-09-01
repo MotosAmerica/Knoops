@@ -23,6 +23,25 @@ window.ACADEMY_DATA = {
           ]},
           { type: "do", text: "Write your own version of this exchange for a customer who says: \"I love dark chocolate, the darker the better.\"" },
         ]},
+        { heading: "Step 3: What flavors", blocks: [
+          { type: "para", text: "The real extras list is bigger than most first-timers realize — knowing it by category, not just by memorizing every item, is what lets you suggest something instead of just reading a list." },
+          { type: "list", items: [
+            "Spices — salt, black pepper, pink pepper, pimentón, Szechuan pepper, chilli, nutmeg, turmeric, star anise, cardamom, cinnamon",
+            "Botanicals — rosemary, mint, thyme, lavender, orange, lemon, lime, ginger",
+            "Toppings — handmade marshmallows, whipped cream, vegan whipped cream, matcha",
+          ]},
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "What flavors do you even have? I only know vanilla and caramel." },
+            { speaker: "Knoopologist", text: "Those are both great — if you want something a little different, orange or sea salt are two of our most-loved. Want to try one of those instead, or stick with a classic?" },
+          ]},
+        ]},
+        { heading: "Step 4: What milk", blocks: [
+          { type: "para", text: "Five plant-based options exist, not just oat — worth naming more than one when a customer asks." },
+          { type: "list", items: [
+            "Dairy — whole, semi-skimmed, skimmed, lacto-free",
+            "Plant-based — oat, almond, soya, coconut, hazelnut",
+          ]},
+        ]},
         { heading: "The full interview, start to finish", blocks: [
           { type: "para", text: "Four questions, under thirty seconds, every one of them mattering. That's the goal — not rushing, just never wasting a question." },
         ]},
