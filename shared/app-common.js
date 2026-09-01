@@ -18,12 +18,55 @@
       return {};
     }
   }
-  function saveProgress(moduleId, done) {
+  function saveProgress(moduleId, done, extra) {
     try {
       const p = loadProgress();
       p[moduleId] = done;
       localStorage.setItem(PROGRESS_KEY, JSON.stringify(p));
     } catch (e) { /* best-effort only */ }
+    syncProgressToSupabase(moduleId, extra);
+  }
+
+  // ---------- Server-side progress sync (for the manager tracker) ----------
+  // Best-effort: if there's no trainee signed in yet, or Supabase isn't
+  // configured, or the request fails, local progress (above) still works —
+  // this only adds the "a manager can see it" layer on top.
+  function syncProgressToSupabase(moduleId, extra) {
+    const c = window.KNOOPS_CONFIG || {};
+    const signIn = window.KnoopsSignIn;
+    if (!c.SUPABASE_URL || !signIn) return;
+    const trainee = signIn.getTrainee();
+    if (!trainee || trainee._local || String(trainee.id).indexOf("local-") === 0) return;
+    const mod = DATA.modules.find((m) => m.id === moduleId);
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": c.SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
+      "Prefer": "resolution=merge-duplicates",
+    };
+    fetch(`${c.SUPABASE_URL}/rest/v1/module_progress?on_conflict=trainee_id,academy,module_num`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify([{
+        trainee_id: trainee.id,
+        academy: DATA.slug,
+        module_num: moduleId,
+        module_title: mod ? mod.title : null,
+      }]),
+    }).catch(() => {});
+    if (extra && extra.quiz) {
+      fetch(`${c.SUPABASE_URL}/rest/v1/quiz_attempts`, {
+        method: "POST",
+        headers: { ...headers, "Prefer": "return=minimal" },
+        body: JSON.stringify([{
+          trainee_id: trainee.id,
+          academy: DATA.slug,
+          module_num: moduleId,
+          score: extra.quiz.scorePct,
+          passed: extra.quiz.scorePct >= 80,
+        }]),
+      }).catch(() => {});
+    }
   }
 
   function qs(sel, root) { return (root || document).querySelector(sel); }
@@ -220,7 +263,10 @@
     }
     const doneBtn = el("button", "btn", "Mark module complete");
     doneBtn.onclick = () => {
-      saveProgress(mod.id, true);
+      const answered = Object.keys(results).length;
+      const correct = Object.values(results).filter(Boolean).length;
+      const scorePct = answered ? Math.round((correct / mod.questions.length) * 100) : 0;
+      saveProgress(mod.id, true, { quiz: { scorePct } });
       doneBtn.textContent = "✓ Completed";
       doneBtn.disabled = true;
     };
