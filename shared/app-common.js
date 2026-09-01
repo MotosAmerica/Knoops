@@ -146,6 +146,27 @@
     }).catch(() => {});
   }
 
+  // Flattens a module's teaching content into plain text so the grader can
+  // judge the answer against what this module actually taught, rather than
+  // against a general idea of a good answer. Capped so a long module doesn't
+  // blow out the request.
+  function moduleTeachingText(moduleId) {
+    const mod = DATA.modules.find((m) => m.id === moduleId);
+    if (!mod || !mod.screens) return "";
+    const parts = [];
+    mod.screens.forEach((screen) => {
+      if (screen.heading) parts.push(`## ${screen.heading}`);
+      (screen.blocks || []).forEach((b) => {
+        if (b.type === "para" || b.type === "quote") parts.push(b.text);
+        else if (b.type === "list" && b.items) parts.push(b.items.map((i) => `- ${i}`).join("\n"));
+        else if (b.type === "dialogue" && b.lines) {
+          parts.push(b.lines.map((l) => `${l.speaker}: "${l.text}"`).join("\n"));
+        }
+      });
+    });
+    return parts.join("\n\n").slice(0, 7000);
+  }
+
   // Rotated so a strong trainee doing several reps in a row doesn't see the
   // same line every time. Deliberately short and plain — earned praise, not
   // confetti.
@@ -349,6 +370,10 @@
           moduleTitle: ctx.moduleTitle,
           prompt: block.text,
           response: text,
+          // What this module actually taught. Without it the grader is marking
+          // an answer it has no lesson to measure against, which is how you end
+          // up scoring writing quality instead of understanding.
+          taught: moduleTeachingText(ctx.moduleId),
         }),
       })
         .then((r) => r.json())
