@@ -234,6 +234,60 @@ a { color: var(--knoops-brown); }
 }
 .practice-retry:hover { background: rgba(154, 83, 46, 0.08); }
 
+/* Below a 4, the retry stops being an optional link and becomes the obvious
+   next action — encouraging, never punitive. Nothing here gates completion. */
+.practice-result.needs-retry { border-left: 3px solid var(--knoops-tan); }
+.practice-nudge {
+  background: #FFF6E5;
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: #6b4a1c;
+}
+.practice-retry.primary {
+  background: var(--knoops-brown); color: #fff; border-color: var(--knoops-brown);
+  min-height: 44px; padding: 11px 22px; font-size: 0.92rem;
+}
+.practice-retry.primary:hover { background: var(--knoops-brown-dark); }
+.practice-result.passed .practice-retry { opacity: 0.8; font-weight: 500; }
+
+/* A 5 gets real, visible credit — bold enough to feel earned, restrained
+   enough to still look like Knoops. Brand tan/brown only, one seal, one line. */
+.practice-result.top-mark {
+  border: 1px solid var(--knoops-tan);
+  box-shadow: 0 2px 14px rgba(217, 178, 125, 0.35);
+}
+.practice-kudos {
+  display: flex; align-items: center; gap: 12px;
+  margin: -14px -16px 14px; padding: 12px 16px;
+  background: linear-gradient(90deg, var(--knoops-brown) 0%, #A9612F 100%);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  animation: kudos-in 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+.practice-kudos-seal {
+  flex-shrink: 0;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--knoops-tan); color: var(--knoops-brown-dark);
+  font-size: 0.95rem; line-height: 1;
+  box-shadow: 0 0 0 3px rgba(217, 178, 125, 0.25);
+}
+.practice-kudos-text {
+  color: #fff; font-weight: 600; font-size: 0.92rem; line-height: 1.4;
+}
+.practice-result.top-mark .practice-pip.filled {
+  background: var(--knoops-tan); color: var(--knoops-brown-dark);
+}
+@keyframes kudos-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .practice-kudos { animation: none; }
+}
+
 /* ---------- Ask the Founder / Ask This Manual widget ---------- */
 .ask-widget { background: var(--knoops-ink); color: var(--knoops-white); border-radius: var(--radius-lg); padding: 24px; margin: 20px 0; }
 .ask-widget h3 { margin-top: 0; color: var(--knoops-tan); }

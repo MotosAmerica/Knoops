@@ -113,6 +113,8 @@ window.ACADEMY_DATA = {
             { speaker: "Store Trainer", text: "That was really good — I liked how you picked up that they wanted something classic rather than pushing a flavor suggestion. One thing: try leaving a beat before you jump into the strength question, let them finish their sentence first." },
           ]},
           { type: "do", text: "Think about what you'd actually watch for and comment on if you observed someone running a full four-question interview live. Write down two or three specific things you'd give feedback on." },
+          { type: "para", text: "Knowing what to say and being able to say it well are different skills, and the second one is entirely about delivery. The same feedback lands as encouragement or as criticism depending almost completely on tone — which is exactly the part you can't rehearse by writing it down." },
+          { type: "do", text: "You've just watched a new Knoopologist run their first four-question interview. They were warm and the customer left happy, but they skipped the milk question entirely and had to chase the customer down to ask. Deliver your feedback to them out loud, as you'd actually say it — name something real they did well first, then the fix, and keep it to under twenty seconds." },
         ]},
         { heading: "Documenting the sign-off", blocks: [
           { type: "para", text: "Once you're actually observing and certifying someone's live skills, that observation should get recorded — even simply — so the credential someone earns genuinely reflects both the digital and live halves of their training, not just the digital exam." },

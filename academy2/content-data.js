@@ -44,6 +44,8 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "The full interview, start to finish", blocks: [
           { type: "para", text: "Four questions, under thirty seconds, every one of them mattering. That's the goal — not rushing, just never wasting a question." },
+          { type: "para", text: "Practising the steps separately is useful, but it isn't the same skill as running all four as one flowing conversation — that's where it either sounds like a warm exchange or like a form being filled in. This is the single most important rep in the whole platform, and it's worth doing out loud until it stops feeling like a script." },
+          { type: "do", text: "Run the whole four-question interview out loud, start to finish, as one continuous conversation — for a customer who walks up and says: \"Hi — I've never been here before, what do you recommend?\" Play both parts, keep it under thirty seconds, and land on a specific drink by the end." },
         ]},
       ],
     },
@@ -240,7 +242,34 @@ window.ACADEMY_DATA = {
         { heading: "How this works", blocks: [
           { type: "para", text: "Four scenarios: the overwhelmed first-timer, a busy rush with a small ask mid-order, something's gone wrong, and a regular trying something new. Each one draws on everything from this academy — the four-question interview, reading the customer, recommending with confidence, presence, small asks, and recovery — in one realistic conversation rather than isolated examples." },
           { type: "para", text: "This module is a rehearsal tier — repeat it as often as you like, with a different scenario or a different approach each time. There's no penalty for practicing the same scenario badly before getting it right; that's what rehearsal is for." },
-          { type: "placeholder", text: "live AI-graded scenario chat — connects once Supabase/edge function are set up (see README)" },
+          { type: "para", text: "The four scenarios are below. Say your answer out loud, the way you'd actually say it at the counter — tone is most of what's being practised here, and it's the part that doesn't come across when you type. Each one gets scored and comes back with specific feedback." },
+        ]},
+        { heading: "Scenario 1 — The overwhelmed first-timer", blocks: [
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "(looking up at the board, slightly stalled) Oh wow. Okay. I've genuinely never been anywhere like this. What… what do I even do here?" },
+          ]},
+          { type: "do", text: "Take it from here, out loud. Get them from overwhelmed to holding a drink they're excited about — using the four questions, but keeping it feeling like a conversation, not an intake form." },
+        ]},
+        { heading: "Scenario 2 — A small ask, mid-rush", blocks: [
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "(you're three orders deep, line out the door) Sorry — I know you're slammed. Is there any chance I could swap this to oat, and could it be not too hot? My daughter's going to share it." },
+          ]},
+          { type: "do", text: "Answer out loud, at rush pace. Make the ask feel genuinely easy — without slowing your line down or sounding clipped. Both things have to be true at once here." },
+        ]},
+        { heading: "Scenario 3 — Something's gone wrong", blocks: [
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "(returning to the counter, visibly annoyed) I've been waiting nearly fifteen minutes, and this isn't even what I ordered." },
+          ]},
+          { type: "do", text: "Respond out loud. Acknowledge, fix it plainly, and keep your tone steady through both — don't explain before you've acknowledged, and don't match their energy." },
+        ]},
+        { heading: "Scenario 4 — A regular wanting something new", blocks: [
+          { type: "dialogue", lines: [
+            { speaker: "Customer", text: "(a regular you recognize) Same as always… actually, no. Surprise me. I trust you." },
+          ]},
+          { type: "do", text: "Make the recommendation out loud. Be specific and confident, give one real reason why they'll like it, and make it feel like it was chosen for them rather than pulled off a list." },
+        ]},
+        { heading: "What's still coming", blocks: [
+          { type: "placeholder", text: "live back-and-forth AI role-play chat (multi-turn, where the customer responds to what you say) — the scenarios above are graded single responses in the meantime" },
         ]},
       ],
     },

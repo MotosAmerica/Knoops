@@ -146,6 +146,16 @@
     }).catch(() => {});
   }
 
+  // Rotated so a strong trainee doing several reps in a row doesn't see the
+  // same line every time. Deliberately short and plain — earned praise, not
+  // confetti.
+  const KUDOS_LINES = [
+    "Full marks — that's exactly how it should sound at the counter.",
+    "Full marks — you could say that to a customer as written.",
+    "Full marks — that's Store Trainer standard.",
+    "Full marks — nothing to fix on that one.",
+  ];
+
   function renderScorePips(score) {
     const wrap = el("div", "practice-score");
     wrap.appendChild(el("span", "practice-score-label", "Score"));
@@ -244,10 +254,41 @@
     wrap.appendChild(resultBox);
 
     function showResult(result, responseText) {
+      // Three tiers: below a 4 we nudge another attempt rather than letting
+      // someone bank a weak rep and move on (framed as "worth another go",
+      // never as failure — nothing here blocks module completion); a 4 passes
+      // quietly; a 5 gets real, visible credit.
+      const needsAnotherGo = result.score < 4;
+      const isTop = result.score === 5;
+
       resultBox.innerHTML = "";
+      resultBox.className = "practice-result" +
+        (needsAnotherGo ? " needs-retry" : isTop ? " top-mark" : " passed");
+
+      if (isTop) {
+        const kudos = el("div", "practice-kudos");
+        kudos.appendChild(el("span", "practice-kudos-seal", "★"));
+        kudos.appendChild(el("span", "practice-kudos-text", KUDOS_LINES[
+          Math.floor(Math.random() * KUDOS_LINES.length)
+        ]));
+        resultBox.appendChild(kudos);
+      }
+
       resultBox.appendChild(renderScorePips(result.score));
       resultBox.appendChild(el("p", "practice-feedback", result.feedback));
-      const again = el("button", "practice-retry", "Try it again");
+
+      if (needsAnotherGo) {
+        resultBox.appendChild(el(
+          "div", "practice-nudge",
+          "↻ Worth another go before you move on — take the note above and say it again. Most people land it on the second try."
+        ));
+      }
+
+      const again = el(
+        "button",
+        "practice-retry" + (needsAnotherGo ? " primary" : ""),
+        needsAnotherGo ? "Try it again" : "Practice it again"
+      );
       again.type = "button";
       again.addEventListener("click", () => {
         resultBox.style.display = "none";
@@ -256,6 +297,7 @@
         submitBtn.textContent = "Get feedback";
         status.textContent = "";
         ta.focus();
+        ta.scrollIntoView({ behavior: "smooth", block: "center" });
       });
       resultBox.appendChild(again);
       resultBox.style.display = "block";

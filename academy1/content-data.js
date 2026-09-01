@@ -31,6 +31,8 @@ window.ACADEMY_DATA = {
           heading: "Closing",
           blocks: [
             { type: "quote", text: "Every store that's opened since — including this one — carries a piece of that same idea: the best drink, made for the next person who walks in. That's not a slogan. That's literally how the company started." },
+            { type: "para", text: "Customers ask about this more than you'd expect — \"so what is this place?\", \"is this a chain?\", \"how did this start?\" — usually while they're waiting for their drink. Being able to answer that warmly, in about thirty seconds, without sounding like you're reciting a brochure, is a real skill worth having ready before the first time someone asks." },
+            { type: "do", text: "Tell the Knoops story out loud, in your own words, in about thirty seconds — as if a curious customer just asked you \"so how did this place start?\" while waiting for their drink. Don't recite the dates; tell it like a story you actually find interesting." },
           ],
         },
       ],
