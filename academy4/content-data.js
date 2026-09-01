@@ -11,28 +11,46 @@ window.ACADEMY_DATA = {
     {
       id: 1, title: "Steaming & Temperature Fundamentals", type: "reading",
       summary: "General technique — non-proprietary, real specifics still placeholder.",
-      screens: [{ heading: "Overview", blocks: [
-        { type: "para", text: "Getting milk (or a plant-based alternative) to the right temperature and texture is genuinely a craft — not just \"heat it up.\" General principles: heat gently rather than aggressively to avoid scalding, and temperature matters as much for taste as for safety (Academy 3, Module 3 covers the safety side)." },
-        { type: "para", text: "This module's exact temperatures, timing, and technique specifics are placeholder — the real, store-specific technique will be taught hands-on by your Store Trainer and filled in here once documented. What's true regardless of the specific numbers: consistency matters more than any single \"correct\" number, since a customer's favorite drink should taste the same way every time they order it." },
-        { type: "placeholder", text: "exact temperature targets, steaming technique specifics, and equipment-specific instructions — to be added once real specs are available" },
-      ]}],
+      screens: [
+        { heading: "Why heat gently", blocks: [
+          { type: "para", text: "Getting milk (or a plant-based alternative) to the right temperature and texture is genuinely a craft — not just \"heat it up.\" General principles: heat gently rather than aggressively to avoid scalding, and temperature matters as much for taste as for safety (Academy 3, Module 3 covers the safety side)." },
+          { type: "para", text: "Scalded milk has a distinct, slightly burnt-sweet smell and a thin, slightly grainy skin on top — most people can learn to recognize it after tasting the difference once or twice side by side with properly heated milk. Different milks also behave differently: plant-based options can split or curdle at temperatures dairy milk handles fine, which is part of why \"just heat it up\" undersells the actual skill involved." },
+        ]},
+        { heading: "Consistency across shifts, not just within one", blocks: [
+          { type: "para", text: "This module's exact temperatures, timing, and technique specifics are placeholder — the real, store-specific technique will be taught hands-on by your Store Trainer and filled in here once documented. What's true regardless of the specific numbers: consistency matters more than any single \"correct\" number, since a customer's favorite drink should taste the same way every time they order it, whether it's made by someone on their first week or their third year." },
+          { type: "para", text: "That's the real test of a well-trained team: a regular shouldn't be able to tell, from taste alone, which Knoopologist made their drink." },
+          { type: "placeholder", text: "exact temperature targets, steaming technique specifics, and equipment-specific instructions — to be added once real specs are available" },
+        ]},
+      ],
     },
     {
       id: 2, title: "Portioning & the 22-Strength System", type: "reading",
       summary: "The system is real and taught in Academy 2; the exact ratios are placeholder.",
-      screens: [{ heading: "Overview", blocks: [
-        { type: "para", text: "You already know, from Academy 1, that Knoops offers 22 hot chocolate strengths and 6 cold — that system itself is real and worth understanding well (Academy 2, Module 1 covers how to guide a customer through it). What's placeholder here is the exact portioning — how much of what, to hit each specific strength consistently." },
-        { type: "para", text: "The exact ratios per strength level are placeholder, to be filled in once your store's real recipe specs are available. What matters now: consistency in portioning is what makes the whole strength system trustworthy — a \"60%\" needs to taste the same way every time, from every Knoopologist, for the system to mean anything to a customer who orders it again expecting the same thing." },
-        { type: "placeholder", text: "real portioning specs/ratios per strength level — to be added once available" },
-      ]}],
+      screens: [
+        { heading: "Why exact portioning is the whole point", blocks: [
+          { type: "para", text: "You already know, from Academy 1, that Knoops offers 22 hot chocolate strengths and 6 cold — that system itself is real and worth understanding well (Academy 2, Module 1 covers how to guide a customer through it). What's placeholder here is the exact portioning — how much of what, to hit each specific strength consistently." },
+          { type: "para", text: "Think back to Academy 2, Module 3 — recommending with confidence only works if the drink actually delivers on the recommendation. If a Knoopologist confidently sells a customer on \"the 55%, it's beautifully balanced,\" and the actual portioning that day makes it taste closer to a 45%, the confidence was wasted — worse, it teaches the customer not to trust the recommendation next time." },
+        ]},
+        { heading: "Measuring versus eyeballing", blocks: [
+          { type: "para", text: "The exact ratios per strength level are placeholder, to be filled in once your store's real recipe specs are available. As a general principle worth internalizing now: a measured, repeatable method — a scale, a marked scoop, a calibrated pour — beats \"eyeballing it,\" even for someone experienced. Eyeballing tends to drift slowly over a shift, and nobody notices their own drift in the moment." },
+          { type: "para", text: "Consistency in portioning is what makes the whole strength system trustworthy — a \"60%\" needs to taste the same way every time, from every Knoopologist, for the system to mean anything to a customer who orders it again expecting the same thing." },
+          { type: "placeholder", text: "real portioning specs/ratios per strength level — to be added once available" },
+        ]},
+      ],
     },
     {
       id: 3, title: "Tempering & Consistency Standards", type: "reading",
       summary: "General chocolate-tempering principles apply; Knoops-specific standards are placeholder.",
-      screens: [{ heading: "Overview", blocks: [
-        { type: "para", text: "Tempering — bringing chocolate to the right consistency and texture — is a real skill with real technique behind it. General chocolate-tempering principles apply here (temperature control, avoiding overheating, consistent technique), but Knoops-specific tempering procedures and consistency standards are placeholder, to be taught hands-on and filled in here once documented." },
-        { type: "placeholder", text: "specific tempering technique, target consistency standards, and troubleshooting guidance (what a too-thick or too-thin result means and how to correct it) — to be added once available" },
-      ]}],
+      screens: [
+        { heading: "What tempering is actually for", blocks: [
+          { type: "para", text: "Tempering — bringing chocolate to the right consistency and texture — is a real skill with real technique behind it. At its core, tempering is about getting the cocoa butter in chocolate into a stable crystal structure: done right, chocolate sets with a clean snap and a glossy finish; done wrong, it can turn dull, streaky, or soft even though nothing about the ingredients themselves changed." },
+          { type: "para", text: "General chocolate-tempering principles apply here — temperature control, avoiding overheating, consistent technique — but Knoops-specific tempering procedures and consistency standards are placeholder, to be taught hands-on and filled in here once documented." },
+        ]},
+        { heading: "Reading the result, generally", blocks: [
+          { type: "para", text: "Even without store-specific numbers, a few general tells are worth knowing: chocolate that's grainy or gritty rather than smooth has usually been overheated; chocolate that looks dull or develops a whitish streaking (called \"bloom\") after setting has usually gone through an unstable temperature swing. These are craft observations, not diagnoses — the real troubleshooting technique is store-specific and comes from your Store Trainer." },
+          { type: "placeholder", text: "specific tempering technique, target consistency standards, and troubleshooting guidance (what a too-thick or too-thin result means and how to correct it) — to be added once available" },
+        ]},
+      ],
     },
     {
       id: 4, title: "The Real Menu — Origins, Extras & Milk", type: "reading",

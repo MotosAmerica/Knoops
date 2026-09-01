@@ -81,6 +81,8 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "A hug in a mug", blocks: [
           { type: "para", text: "Jens has described hot chocolate as a \"hug in a mug.\" Hot chocolate has always sat in comfort and treat territory emotionally — Knoops built an entire craft and business around honoring that properly." },
+          { type: "para", text: "That emotional register is worth remembering when you're recommending a drink, not just describing one. \"This is a treat, take your time with it\" lands differently than reading off a percentage and a flavor list — and it's honestly closer to what's actually being sold here." },
+          { type: "do", text: "In your own words, describe what a Knoops drink is actually selling — beyond the chocolate itself — in one or two sentences you'd feel natural saying to a customer." },
         ]},
       ],
     },
@@ -116,8 +118,10 @@ window.ACADEMY_DATA = {
           { type: "para", text: "Rye, London, York, Dubai, Salt Lake City — every Knoops store started from the same idea. What differs, store to store, is the community each one actually sits inside of." },
         ]},
         { heading: "What 'part of the community' means here", blocks: [
+          { type: "para", text: "Jens has talked about wanting every store to work with local producers — not as a marketing checkbox, but because a store genuinely becomes part of the neighborhood it's in, the same way the original Rye shop was part of Rye. That can mean a local bakery supplying pastries, a nearby roaster for the coffee side of the menu, or something as simple as knowing the other independent shops on the same street." },
           { type: "placeholder", text: "this store's specific local partnerships/connections — to be filled in once documented" },
-          { type: "para", text: "What doesn't wait: the biggest local connection any store has is the people working the counter. A regular comes back because a specific person recognized them — that's the realest version of 'local' there is." },
+          { type: "para", text: "What doesn't wait: the biggest local connection any store has is the people working the counter. A regular comes back because a specific person recognized them — that's the realest version of 'local' there is, and it's true on day one at a brand-new store just as much as it is at the Rye original." },
+          { type: "do", text: "Name one thing — a nearby business, an event, a neighborhood habit — that makes your specific store's location distinct from every other Knoops. If you're not sure yet, ask a teammate who's been there longer." },
         ]},
       ],
     },
