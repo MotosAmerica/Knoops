@@ -42,15 +42,18 @@ a { color: var(--knoops-brown); }
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 20px;
 }
 .topbar .brand { font-weight: 700; font-size: 1.1rem; letter-spacing: 0.02em; }
 .topbar .brand-sub { color: var(--knoops-tan); font-weight: 400; font-size: 0.85rem; margin-left: 8px; }
+.topbar nav { display: flex; flex-wrap: wrap; gap: 20px; }
 .topbar nav a {
   color: var(--knoops-white);
   text-decoration: none;
-  margin-left: 20px;
   font-size: 0.9rem;
   opacity: 0.85;
+  white-space: nowrap;
 }
 .topbar nav a:hover { opacity: 1; }
 
@@ -321,3 +324,76 @@ a { color: var(--knoops-brown); }
 .tracker-bar { background: var(--knoops-brown); height: 100%; }
 .tracker-empty { text-align: center; padding: 40px; color: #888; }
 .tracker-note { background: #FFF6E5; border: 1px solid var(--knoops-tan); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.85rem; color: #6b4a1c; margin-bottom: 20px; }
+
+/* ---------------------------------------------------------------------------
+   Phone layout
+   Most Knoopologists will use this on a handset, often one-handed on a break.
+   The topbar was previously a rigid nowrap flex row, which squeezed the brand,
+   nav, and signed-in user into three narrow columns of wrapped text and pushed
+   "Sign out" off the right edge. Below 700px it becomes a clean stack instead.
+--------------------------------------------------------------------------- */
+@media (max-width: 700px) {
+  .topbar {
+    padding: 12px 16px;
+    gap: 8px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  /* Brand block: title on one line, the academy/module sub-label beneath it */
+  .topbar > div:first-child { width: 100%; }
+  .topbar .brand { font-size: 1.05rem; display: block; }
+  .topbar .brand-sub {
+    display: block;
+    margin-left: 0;
+    margin-top: 2px;
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+  .topbar nav {
+    width: 100%;
+    gap: 16px;
+    padding-top: 2px;
+  }
+  .topbar nav a { font-size: 0.85rem; margin-left: 0; }
+
+  #topbar-user {
+    width: 100%;
+    margin-left: 0;
+    gap: 4px 16px;
+    flex-wrap: wrap;
+    align-items: baseline;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+  /* Identity gets its own line so the two links always sit together on the
+     next one — otherwise a long name + store ("Jordan Petersen · Edinburgh
+     New Town") strands "Sign out" alone on a third row. */
+  #topbar-user .topbar-user-info {
+    flex: 0 0 100%;
+    font-size: 0.8rem;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  #topbar-user a { font-size: 0.8rem; white-space: nowrap; }
+
+  .wrap { padding: 24px 16px 64px; }
+  h1 { font-size: 1.5rem; line-height: 1.25; }
+
+  /* Module chip nav: let it breathe instead of cramming */
+  #module-nav { gap: 8px; }
+  #module-nav a { font-size: 0.85rem; padding: 8px 14px; }
+
+  .screen { padding: 18px 16px; }
+  .do-prompt { padding: 14px 16px; }
+  .hub-grid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* Tracker tables can't shrink below their content — scroll them instead of
+     letting them widen the whole page */
+  #tracker-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .tracker-table { min-width: 620px; }
+  .tracker-stats { grid-template-columns: repeat(2, 1fr); }
+  .tracker-filters { flex-direction: column; }
+  .tracker-filters input, .tracker-filters select { width: 100%; }
+}
