@@ -38,6 +38,18 @@
   }
   function rel(path) { return inAcademyFolder() ? `../${path}` : path; }
 
+  // Find-or-create, not blind insert.
+  //
+  // This used to POST straight to /trainees, which meant every sign-in — a new
+  // device, a new browser, or just signing out and back in — created a brand
+  // new trainee with an empty history, and one person showed up in the manager
+  // tracker several times over.
+  //
+  // The matching now happens in one place, in the database
+  // (find_or_create_trainee), so it's atomic and identical for every client.
+  // Identity is name + store, and the name match is deliberately forgiving:
+  // case, extra spaces, middle names, initials, shortened given names
+  // (Doug/Douglas) and nicknames (Bob/Robert) all resolve to one person.
   async function insertTrainee(name, store, role) {
     const c = cfg();
     if (!c.SUPABASE_URL) {
@@ -45,19 +57,19 @@
       // the rest of the platform (progress, quizzes) keeps working offline.
       return { id: `local-${Date.now()}`, name, store_location: store, role, _local: true };
     }
-    const resp = await fetch(`${c.SUPABASE_URL}/rest/v1/trainees`, {
+    const resp = await fetch(`${c.SUPABASE_URL}/rest/v1/rpc/find_or_create_trainee`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "apikey": c.SUPABASE_ANON_KEY,
         "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
-        "Prefer": "return=representation",
       },
-      body: JSON.stringify([{ name, store_location: store, role }]),
+      body: JSON.stringify({ p_name: name, p_store: store, p_role: role }),
     });
     if (!resp.ok) throw new Error(`sign-in failed (${resp.status})`);
-    const rows = await resp.json();
-    return rows[0];
+    const row = await resp.json();
+    // The RPC returns the trainees row itself (an object, not an array).
+    return Array.isArray(row) ? row[0] : row;
   }
 
   function buildOverlay(onDone) {
