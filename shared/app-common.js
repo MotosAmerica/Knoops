@@ -196,7 +196,17 @@
     answerBox.style.display = "none";
     wrap.appendChild(answerBox);
 
-    const note = el("div", "config-note", "Grounded in Jens Knoop's real, sourced interviews — never invented quotes.");
+    const note = el("div", "config-note");
+    if (mod.groundingTable) {
+      note.appendChild(document.createTextNode("Grounded in Jens Knoop's real, "));
+      const link = el("a", "sources-link", "sourced interviews");
+      link.href = "#";
+      link.onclick = (e) => { e.preventDefault(); openSourcesModal(mod.groundingTable); };
+      note.appendChild(link);
+      note.appendChild(document.createTextNode(" — never invented quotes."));
+    } else {
+      note.textContent = "Grounded in Jens Knoop's real, sourced interviews — never invented quotes.";
+    }
     wrap.appendChild(note);
 
     async function ask() {
@@ -209,23 +219,33 @@
     input.addEventListener("keydown", (e) => { if (e.key === "Enter") ask(); });
 
     container.appendChild(wrap);
+  }
 
-    // Grounding table shown underneath for transparency during the demo /
-    // content-review phase — remove or collapse once the AI widget is live.
-    if (mod.groundingTable) {
-      const gt = el("div", "screen");
-      gt.appendChild(el("h2", "", "Source-quote library (build reference)"));
-      const table = document.createElement("table");
-      table.style.width = "100%";
-      table.style.borderCollapse = "collapse";
-      mod.groundingTable.forEach((row) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `<td style="padding:8px;border-bottom:1px solid #eee;font-weight:600;width:20%">${row.topic}</td><td style="padding:8px;border-bottom:1px solid #eee;">${row.quote}<br><a href="${row.sourceUrl}" style="font-size:0.8rem;">${row.source}</a></td>`;
-        table.appendChild(tr);
-      });
-      gt.appendChild(table);
-      container.appendChild(gt);
-    }
+  // ---------- Sources modal (the grounding-quote popup) ----------
+  function openSourcesModal(groundingTable) {
+    let overlay = qs("#sources-modal-overlay");
+    if (overlay) overlay.remove();
+
+    overlay = el("div", "sources-modal-overlay");
+    const card = el("div", "sources-modal");
+    const closeBtn = el("button", "sources-modal-close", "×");
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.onclick = () => overlay.remove();
+    card.appendChild(closeBtn);
+    card.appendChild(el("h2", "", "Where these answers come from"));
+    card.appendChild(el("p", "", "Every answer above is grounded only in these real, sourced quotes — nothing is invented."));
+
+    const table = document.createElement("table");
+    table.className = "sources-table";
+    groundingTable.forEach((row) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td class="sources-topic">${row.topic}</td><td>${row.quote}<br><a href="${row.sourceUrl}" target="_blank" rel="noopener">${row.source}</a></td>`;
+      table.appendChild(tr);
+    });
+    card.appendChild(table);
+    overlay.appendChild(card);
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    document.body.appendChild(overlay);
   }
 
   // ---------- Quiz module (reveal-and-explain) ----------

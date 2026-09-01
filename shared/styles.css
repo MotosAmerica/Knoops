@@ -176,6 +176,30 @@ a { color: var(--knoops-brown); }
 }
 .ask-widget .answer { background: rgba(255,255,255,0.08); border-radius: var(--radius-md); padding: 16px; margin-top: 14px; font-size: 0.95rem; }
 .ask-widget .config-note { font-size: 0.8rem; color: var(--knoops-tan); margin-top: 10px; }
+.ask-widget .config-note .sources-link { color: var(--knoops-tan); text-decoration: underline; cursor: pointer; }
+.ask-widget .config-note .sources-link:hover { color: var(--knoops-white); }
+
+/* ---------- Sources modal ---------- */
+.sources-modal-overlay {
+  position: fixed; inset: 0; background: rgba(18,18,18,0.72);
+  display: flex; align-items: center; justify-content: center; z-index: 999; padding: 20px;
+}
+.sources-modal {
+  background: var(--knoops-white); border-radius: var(--radius-lg); padding: 28px 30px;
+  max-width: 640px; width: 100%; max-height: 80vh; overflow-y: auto; position: relative;
+  box-shadow: var(--shadow-lift);
+}
+.sources-modal h2 { margin: 0 0 6px; color: var(--knoops-brown); }
+.sources-modal p { color: #555; font-size: 0.9rem; margin: 0 0 16px; }
+.sources-modal-close {
+  position: absolute; top: 16px; right: 18px; background: none; border: none;
+  font-size: 1.6rem; line-height: 1; color: #888; cursor: pointer; padding: 0;
+}
+.sources-modal-close:hover { color: var(--knoops-ink); }
+.sources-table { width: 100%; border-collapse: collapse; }
+.sources-table td { padding: 10px 8px; border-bottom: 1px solid #eee; font-size: 0.9rem; vertical-align: top; }
+.sources-table .sources-topic { font-weight: 600; width: 32%; color: var(--knoops-brown); }
+.sources-table a { font-size: 0.8rem; }
 
 /* ---------- Quiz ---------- */
 .quiz-q { background: var(--knoops-white); border-radius: var(--radius-md); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow-soft); }
