@@ -32,7 +32,11 @@ window.ACADEMY_DATA = {
           blocks: [
             { type: "quote", text: "Every store that's opened since — including this one — carries a piece of that same idea: the best drink, made for the next person who walks in. That's not a slogan. That's literally how the company started." },
             { type: "para", text: "Customers ask about this more than you'd expect — \"so what is this place?\", \"is this a chain?\", \"how did this start?\" — usually while they're waiting for their drink. Being able to answer that warmly, in about thirty seconds, without sounding like you're reciting a brochure, is a real skill worth having ready before the first time someone asks." },
-            { type: "do", text: "Tell the Knoops story out loud, in your own words, in about thirty seconds — as if a curious customer just asked you \"so how did this place start?\" while waiting for their drink. Don't recite the dates; tell it like a story you actually find interesting." },
+            { type: "do", variants: [
+              "Tell the Knoops story out loud, in your own words, in about thirty seconds, as if a curious customer just asked you 'so how did this place start?' while waiting for their drink. Don't recite the dates; tell it like a story you actually find interesting.",
+              "A customer glances at the board and says 'is this a chain? I've never heard of it.' Give your answer out loud in about thirty seconds, in a way that makes them glad they asked.",
+              "A new starter on their first shift asks you why Knoops exists at all. Talk them through it in about thirty seconds, the way you'd actually say it to a teammate rather than a customer.",
+            ]},
           ],
         },
       ],
@@ -79,12 +83,20 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "I don't really get the percentages, what's the difference?" },
             { speaker: "Knoopologist", text: "Think of it less as a number and more as a mood — lower percentages are gentle and comforting, higher ones are intense and a bit more of a treat. What kind of mood are you in today?" },
           ]},
-          { type: "do", text: "Practice explaining the percentage range out loud, in under fifteen seconds, using the mood framing rather than listing numbers." },
+          { type: "do", variants: [
+            "Say the percentage range out loud in under fifteen seconds, using the mood framing rather than listing numbers.",
+            "A customer points at the board and says 'what do all these numbers even mean?' Give your answer in under fifteen seconds, without naming more than two or three percentages.",
+            "Someone tells you they always get the same thing and asks what the other numbers are for. Talk them through the range in under fifteen seconds, using mood rather than strength.",
+          ]},
         ]},
         { heading: "A hug in a mug", blocks: [
           { type: "para", text: "Jens has described hot chocolate as a \"hug in a mug.\" Hot chocolate has always sat in comfort and treat territory emotionally — Knoops built an entire craft and business around honoring that properly." },
           { type: "para", text: "That emotional register is worth remembering when you're recommending a drink, not just describing one. \"This is a treat, take your time with it\" lands differently than reading off a percentage and a flavor list — and it's honestly closer to what's actually being sold here." },
-          { type: "do", text: "In your own words, describe what a Knoops drink is actually selling — beyond the chocolate itself — in one or two sentences you'd feel natural saying to a customer." },
+          { type: "do", variants: [
+            "In your own words, say what a Knoops drink is actually selling, beyond the chocolate itself, in one or two sentences you'd feel natural saying to a customer.",
+            "A customer says 'it's just hot chocolate though, isn't it?' Give your answer out loud, warmly, without sounding defensive about the price.",
+            "A friend asks what makes your job different from working at any coffee shop. Say your answer in a sentence or two, in your own words.",
+          ]},
         ]},
       ],
     },
@@ -100,7 +112,11 @@ window.ACADEMY_DATA = {
         { heading: "\"It's my name on the stores\"", blocks: [
           { type: "quote", text: "It's my name on the stores. I am responsible for what we are selling in the stores." },
           { type: "para", text: "That's why the farm visits happen at all — when your own name is attached to something, checking it yourself stops being optional." },
-          { type: "do", text: "Write your own honest response to a skeptical customer who assumes 'ethical sourcing' is just marketing language." },
+          { type: "do", variants: [
+            "Give your own honest answer to a sceptical customer who assumes 'ethical sourcing' is just marketing language.",
+            "A customer asks 'so does the founder actually go to these farms, or is that just a story on the wall?' Say how you'd answer that.",
+            "Someone asks who actually grows the chocolate you're selling them. Talk them through what you genuinely know, without overclaiming.",
+          ]},
         ]},
         { heading: "When you don't know the exact detail", blocks: [
           { type: "dialogue", lines: [
@@ -131,7 +147,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "The 55% hazelnut, right? Coming up — good to see you again." },
           ]},
           { type: "para", text: "That one line — remembering an order, using it without being asked — is the actual mechanism that makes a chain location feel like a neighborhood spot instead of an interchangeable outpost. It's a habit, not a program." },
-          { type: "do", text: "Name one thing — a nearby business, an event, a neighborhood habit — that makes your specific store's location distinct from every other Knoops. If you're not sure yet, ask a teammate who's been there longer. Then name one regular customer whose order you could start remembering this week." },
+          { type: "do", variants: [
+            "Name one thing, a nearby business, an event, or a neighbourhood habit, that makes your specific store's location distinct from every other Knoops. If you're not sure yet, ask a teammate who's been there longer. Then name one regular whose order you could start remembering this week.",
+            "Think of a regular you'd recognise if they walked in right now. Say what you already know about them, and one thing you could learn next time that would make them feel recognised.",
+            "If someone visited your store and then a Knoops in another city, say what they'd notice was different here, beyond the building itself.",
+          ]},
         ]},
       ],
     },

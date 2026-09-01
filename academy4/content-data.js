@@ -66,7 +66,11 @@ window.ACADEMY_DATA = {
           ]},
           { type: "para", text: "There are 22 hot strengths and 6 iced strengths total on the real menu — this list is a representative sample worth knowing cold, not the complete chart. The complete chart is the same one on the counter/register." },
           { type: "para", text: "Knowing an origin and a tasting note is only half of it — the other half is being able to say it out loud without sounding like you're reading a label. \"Raspberry and grapefruit notes\" is on the menu; \"it's got this bright, almost fruity edge to it — people are usually surprised\" is what actually sells it." },
-          { type: "do", text: "Pick one percentage from the list above and describe it out loud to a customer who asked \"what's that one like?\" — use the real origin and tasting note, but say it the way you'd actually say it across a counter, not the way it's written on the board." },
+          { type: "do", variants: [
+            "Pick one percentage from the list above and describe it out loud to a customer who asked 'what's that one like?' Use the real origin and tasting note, but say it the way you'd actually say it across a counter, not the way it reads on the board.",
+            "A customer is choosing between two percentages and asks how they differ. Pick any two from the list above and talk them through it, using the real tasting notes without sounding like you're reading a label.",
+            "Someone says they want to try something they've never had before. Pick one percentage from the list above, say why you're recommending that one, and describe how it actually tastes.",
+          ]},
         ]},
         { heading: "The full flavor extras list", blocks: [
           { type: "para", text: "Real, current extras — organized the way they'd actually come up in a customer conversation." },

@@ -193,9 +193,30 @@
     ctx = ctx || { moduleId: 0, moduleTitle: "", screenIdx: 0 };
     const promptKey = `${ctx.screenIdx}-${ctx.blockIdx}`;
 
+    // Each Do block carries three variants of the same exercise — same skill,
+    // slightly different situation — so coming back to a module isn't a
+    // memory test of one fixed question. `text` is still supported for any
+    // block that hasn't been given variants.
+    const promptSet = (block.variants && block.variants.length)
+      ? block.variants
+      : [block.text];
+
+    // Which variant this visit gets. A previously graded attempt pins its own
+    // variant so a page reload still shows the question they actually
+    // answered; otherwise pick at random. "Try it again" deliberately does NOT
+    // re-roll — you retry the same question with the feedback you just got.
+    const cachedAttempt = loadCachedPractice(ctx, promptKey);
+    let variantIdx =
+      cachedAttempt && typeof cachedAttempt.variantIndex === "number" &&
+      cachedAttempt.variantIndex < promptSet.length
+        ? cachedAttempt.variantIndex
+        : Math.floor(Math.random() * promptSet.length);
+    const promptText = () => promptSet[variantIdx];
+
     const wrap = el("div", "do-prompt practice-card");
     wrap.appendChild(el("div", "tag", "Do — practice"));
-    wrap.appendChild(el("p", "practice-prompt", block.text));
+    const promptEl = el("p", "practice-prompt", promptText());
+    wrap.appendChild(promptEl);
 
     // --- input row: mic (primary) + textarea (fallback/edit) ---
     const controls = el("div", "practice-controls");
@@ -312,6 +333,19 @@
       );
       again.type = "button";
       again.addEventListener("click", () => {
+        // "Try it again" (scored below 4) keeps the SAME question — the whole
+        // point is to apply the feedback you just got to the exercise you just
+        // missed. "Practice it again" (already scored 4 or 5) rolls a
+        // different variant, since that's a fresh rep for variety, not a
+        // do-over.
+        if (!needsAnotherGo && promptSet.length > 1) {
+          let next = variantIdx;
+          while (next === variantIdx) {
+            next = Math.floor(Math.random() * promptSet.length);
+          }
+          variantIdx = next;
+          promptEl.textContent = promptText();
+        }
         resultBox.style.display = "none";
         ta.value = "";
         submitBtn.disabled = false;
@@ -322,11 +356,11 @@
       });
       resultBox.appendChild(again);
       resultBox.style.display = "block";
-      cachePractice(ctx, promptKey, { response: responseText, result });
+      cachePractice(ctx, promptKey, { response: responseText, result, variantIndex: variantIdx });
     }
 
     // Restore a previous attempt on this device
-    const cached = loadCachedPractice(ctx, promptKey);
+    const cached = cachedAttempt;
     if (cached && cached.result) {
       ta.value = cached.response || "";
       showResult(cached.result, cached.response);
@@ -348,7 +382,7 @@
         // No backend configured — still keep the answer, be honest about it.
         status.textContent = "Saved on this device. AI feedback needs the backend connected.";
         status.className = "practice-status";
-        cachePractice(ctx, promptKey, { response: text, result: null });
+        cachePractice(ctx, promptKey, { response: text, result: null, variantIndex: variantIdx });
         return;
       }
 
@@ -368,7 +402,7 @@
           academy: DATA.slug,
           module: ctx.moduleId,
           moduleTitle: ctx.moduleTitle,
-          prompt: block.text,
+          prompt: promptText(),
           response: text,
           // What this module actually taught. Without it the grader is marking
           // an answer it has no lesson to measure against, which is how you end
@@ -382,7 +416,7 @@
           showResult(data, text);
           submitBtn.textContent = "Graded";
           savePracticeToSupabase(
-            ctx, promptKey, block.text, text, usedVoice ? "voice" : "text", data
+            ctx, promptKey, promptText(), text, usedVoice ? "voice" : "text", data
           );
         })
         .catch(() => {
@@ -390,8 +424,8 @@
           submitBtn.textContent = "Get feedback";
           status.textContent = "Couldn't reach the grader just now — your answer is saved, try again in a moment.";
           status.className = "practice-status warn";
-          cachePractice(ctx, promptKey, { response: text, result: null });
-          savePracticeToSupabase(ctx, promptKey, block.text, text, usedVoice ? "voice" : "text", null);
+          cachePractice(ctx, promptKey, { response: text, result: null, variantIndex: variantIdx });
+          savePracticeToSupabase(ctx, promptKey, promptText(), text, usedVoice ? "voice" : "text", null);
         });
     });
 

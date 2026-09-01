@@ -21,7 +21,11 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "I guess... milky? I'm not really a dark chocolate person." },
             { speaker: "Knoopologist", text: "Got it — I'd start you around a 35-40%. Still really chocolatey, but smooth and not overwhelming." },
           ]},
-          { type: "do", text: "Write your own version of this exchange for a customer who says: \"I love dark chocolate, the darker the better.\"" },
+          { type: "do", variants: [
+            "Give me your version of this exchange for a customer who says: 'Something in the middle, I don't want it too rich.' Land on a specific percentage and one reason why.",
+            "How would you play both parts if the customer says: 'I usually buy 70% bars, but this one's for my mum and she likes things gentle'? Finish on an actual number.",
+            "Take it from here: the customer says 'I honestly don't know, what's normal?' Ask the strength question in your own words and land them on a specific percentage.",
+          ]},
         ]},
         { heading: "Step 3: What flavors", blocks: [
           { type: "para", text: "The real extras list is bigger than most first-timers realize — knowing it by category, not just by memorizing every item, is what lets you suggest something instead of just reading a list." },
@@ -45,7 +49,11 @@ window.ACADEMY_DATA = {
         { heading: "The full interview, start to finish", blocks: [
           { type: "para", text: "Four questions, under thirty seconds, every one of them mattering. That's the goal — not rushing, just never wasting a question." },
           { type: "para", text: "Practising the steps separately is useful, but it isn't the same skill as running all four as one flowing conversation — that's where it either sounds like a warm exchange or like a form being filled in. This is the single most important rep in the whole platform, and it's worth doing out loud until it stops feeling like a script." },
-          { type: "do", text: "Run the whole four-question interview out loud, start to finish, as one continuous conversation — for a customer who walks up and says: \"Hi — I've never been here before, what do you recommend?\" Play both parts, keep it under thirty seconds, and land on a specific drink by the end." },
+          { type: "do", variants: [
+            "Run all four questions as one flowing conversation for a customer who says: 'I'm buying for my partner, she loves chocolate but I've no idea what she'd want here.' Play both parts, under thirty seconds, ending on a specific drink.",
+            "Take it from the top, out loud: a customer says 'It's freezing out there, I just want something warming.' Run the whole four-question interview as one conversation and finish on a specific drink.",
+            "Say the full interview start to finish for a customer who says: 'My friend sent me here, I've got no idea what to order.' Both parts, keep it under thirty seconds, and land on one specific drink.",
+          ]},
         ]},
       ],
     },
@@ -74,7 +82,11 @@ window.ACADEMY_DATA = {
         { heading: "When you're not sure", blocks: [
           { type: "para", text: "One question does a lot of work: \"Have you been in before, or is this your first Knoops?\" — a first-timer usually tells you outright, a regular corrects you warmly, a customizer just answers and moves straight into their order." },
           { type: "para", text: "These three types aren't the only ones you'll meet, and people don't always fit neatly — a regular can show up overwhelmed on a bad day, a first-timer can already know exactly what they want from a friend's recommendation. The Six Human Needs lens (certainty, connection, significance, and the others) is a way of reading what someone actually needs in the moment, not a permanent label to file them under." },
-          { type: "do", text: "Think of a real customer type you see often at your store. Write one line for how you'd open the conversation with them differently than with a total stranger." },
+          { type: "do", variants: [
+            "Think of a regular at your store you'd recognize on sight. Give me the one line you'd open with for them, and say how it differs from your opener for a stranger.",
+            "Picture a customer who comes in often but keeps things brief. How would you open with them so it reads as warm rather than as a big chat they didn't ask for?",
+            "Think of someone who always orders the same thing. What would you say to them on a day they seem to be hesitating, that you wouldn't say to a first-timer?",
+          ]},
         ]},
       ],
     },
@@ -106,7 +118,11 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "Which one pairs best with the marshmallows?" },
             { speaker: "Knoopologist", text: "I haven't tried every combination myself yet, but the ones I've heard people love most are the 45% and the 54% — both mild enough that the marshmallow doesn't get lost. I'd start there." },
           ]},
-          { type: "do", text: "Write a confident, one-sentence recommendation for a customer who says: \"I want the strongest thing you've got.\" Then write one for a customer who says: \"Surprise me, I trust you.\"" },
+          { type: "do", variants: [
+            "Give me a confident, one-sentence recommendation for a customer who says: 'Nothing too intense, I'm not really a chocolate person.' Then one for a customer who asks: 'What would you actually order yourself?'",
+            "Say how you'd answer, in one plain sentence each: first a customer asking which drink suits the marshmallows when you honestly haven't tried them all, then one who says 'I want something I've never had before.'",
+            "What would you say to a customer who asks 'Is the orange one any good?' when you've never tried it, and then to one who says 'Just pick for me, I'm in a rush'? One confident sentence each, no hedging.",
+          ]},
         ]},
       ],
     },
@@ -130,7 +146,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "Resetting mid-shift", blocks: [
           { type: "para", text: "A bad interaction, a long line, a mistake you just made — all of it can carry into the next customer if you let it. The reset doesn't need to be dramatic: one real breath, a glance away from the counter for half a second, then back in. The next person in line has no idea what just happened, and they shouldn't have to." },
-          { type: "do", text: "Think of the last time you noticed your own mood affecting how you treated someone (at work or otherwise). Write one sentence on what you'd do differently, in the moment, next time." },
+          { type: "do", variants: [
+            "Think of a day when something threw you off early and stayed with you. Say what one small reset you'd use in the moment to stop it reaching the next person in front of you.",
+            "Bring to mind a time someone else's bad mood pulled you into it. How would you stay steady instead, in the moment, next time?",
+            "Think of a mistake you made in front of someone and carried with you for the next few minutes. Give me one sentence on what you'd do differently before facing the next customer.",
+          ]},
         ]},
       ],
     },
@@ -164,7 +184,11 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "Can I get this in a for-here mug instead of to-go?" },
             { speaker: "Knoopologist", text: "We're actually cup-only in this location, sorry about that — but I'll make sure it's not overfilled so it's easy to carry." },
           ]},
-          { type: "do", text: "Write your own warm, direct response to a request you genuinely can't fulfill — include one small thing you can still do instead." },
+          { type: "do", variants: [
+            "Think of something your store genuinely can't do for a customer. Give me your warm, direct no, plus one small thing you can still offer them instead.",
+            "How would you answer a customer asking for something that's clearly outside what you're allowed to do? Keep it warm and direct, and add the one thing you can do.",
+            "Take it from here: a customer asks for a change you can't make. Say your no plainly, with no sigh and no 'we don't really do that', then offer one small alternative.",
+          ]},
         ]},
       ],
     },
@@ -199,7 +223,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "What to avoid", blocks: [
           { type: "para", text: "Getting defensive, explaining before fixing, matching a frustrated customer's tone, or over-apologizing to the point it becomes about your discomfort rather than their experience — all of these make a fixable moment worse. Steady and plain beats anxious and elaborate, every time." },
-          { type: "do", text: "Write your own acknowledge-fix-stay-steady response to: a customer says their drink arrived cold." },
+          { type: "do", variants: [
+            "Give me your acknowledge, fix, stay steady response to a customer who says the drink they've been handed is someone else's order.",
+            "A customer says the milk in their drink isn't the one they asked for. Talk me through what you'd say, acknowledging before you explain anything.",
+            "How would you respond to a customer who says the drink they just paid for spilled on the way to their table? Acknowledge, fix it plainly, and keep your tone steady through both.",
+          ]},
         ]},
       ],
     },
@@ -231,7 +259,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "Of course — hope you enjoy it." },
           ]},
           { type: "para", text: "No app mention, no upsell — just a genuinely warm sendoff. Reading the room correctly here is part of the craft, not a missed opportunity." },
-          { type: "do", text: "Write a second-ask line you'd feel comfortable saying in your own words — one that wouldn't feel like a script if you said it out loud." },
+          { type: "do", variants: [
+            "Give me a second-ask line in your own words for a customer who's just told you the drink was great, one that wouldn't sound like a pitch said out loud.",
+            "Say how you'd mention the loyalty app to a chatty first-timer, in wording you'd genuinely use, with the no-pressure part sounding like you mean it.",
+            "A quiet customer is heading off with barely a word. What would you actually say to send them off warmly, and would you mention the app at all?",
+          ]},
         ]},
       ],
     },
@@ -248,25 +280,41 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Customer", text: "(looking up at the board, slightly stalled) Oh wow. Okay. I've genuinely never been anywhere like this. What… what do I even do here?" },
           ]},
-          { type: "do", text: "Take it from here, out loud. Get them from overwhelmed to holding a drink they're excited about — using the four questions, but keeping it feeling like a conversation, not an intake form." },
+          { type: "do", variants: [
+            "Take it from here, out loud. Get them from stalled to excited using the four questions, and make your very first line the one that settles them.",
+            "Say your response out loud, same customer, except they add that they're not usually a chocolate person. Use the four questions and still land them on something they're keen to try.",
+            "Talk it through out loud, from their first line to a drink in their hand, keeping it under thirty seconds and never letting it sound like an intake form.",
+          ]},
         ]},
         { heading: "Scenario 2 — A small ask, mid-rush", blocks: [
           { type: "dialogue", lines: [
             { speaker: "Customer", text: "(you're three orders deep, line out the door) Sorry — I know you're slammed. Is there any chance I could swap this to oat, and could it be not too hot? My daughter's going to share it." },
           ]},
-          { type: "do", text: "Answer out loud, at rush pace. Make the ask feel genuinely easy — without slowing your line down or sounding clipped. Both things have to be true at once here." },
+          { type: "do", variants: [
+            "Answer out loud at rush pace, and make their 'sorry, I know you're slammed' turn out to be unnecessary, without losing a second on your line.",
+            "Say it the way you'd actually say it mid-rush, warm and quick, and include the one thing you'd do to make sharing it with her daughter easier.",
+            "Respond out loud at pace, with two more people listening behind her. Make the ask feel genuinely easy and keep the line moving at the same time.",
+          ]},
         ]},
         { heading: "Scenario 3 — Something's gone wrong", blocks: [
           { type: "dialogue", lines: [
             { speaker: "Customer", text: "(returning to the counter, visibly annoyed) I've been waiting nearly fifteen minutes, and this isn't even what I ordered." },
           ]},
-          { type: "do", text: "Respond out loud. Acknowledge, fix it plainly, and keep your tone steady through both — don't explain before you've acknowledged, and don't match their energy." },
+          { type: "do", variants: [
+            "Respond out loud. Lead with the acknowledgement, and don't say a word about why the wait happened until they're sorted.",
+            "Say it out loud, staying steady while they're annoyed, and make sure they never have to ask you twice for the fix.",
+            "Take it from here out loud, covering both parts of what went wrong, the wait and the wrong drink, without getting defensive about either one.",
+          ]},
         ]},
         { heading: "Scenario 4 — A regular wanting something new", blocks: [
           { type: "dialogue", lines: [
             { speaker: "Customer", text: "(a regular you recognize) Same as always… actually, no. Surprise me. I trust you." },
           ]},
-          { type: "do", text: "Make the recommendation out loud. Be specific and confident, give one real reason why they'll like it, and make it feel like it was chosen for them rather than pulled off a list." },
+          { type: "do", variants: [
+            "Make the recommendation out loud, building it off what you already know they usually order so it clearly wasn't pulled off a list.",
+            "Say your recommendation the way you'd really say it: one specific drink, one real reason they'll like it, and no softening words in there.",
+            "Take it from here out loud. Name the drink, give the one reason it's right for them, then say the line you'd use if they hesitate.",
+          ]},
         ]},
         { heading: "What's still coming", blocks: [
           { type: "placeholder", text: "live back-and-forth AI role-play chat (multi-turn, where the customer responds to what you say) — the scenarios above are graded single responses in the meantime" },

@@ -24,7 +24,11 @@ window.ACADEMY_DATA = {
             { speaker: "Shift Lead", text: "Hey — can you jump on drinks for a bit? Orders are backing up more than the queue right now, I'll cover the register." },
           ]},
           { type: "para", text: "Quick, clear, decisive — not asking permission, making a call and communicating it plainly. That's the actual skill." },
-          { type: "do", text: "Think through a recent rush you were part of. If you'd been the Shift Lead, what call would you have made, and when?" },
+          { type: "do", variants: [
+            "Think back to a rush where the drinks queue got ahead of the register. Say the exact call you'd have made as Shift Lead, and the moment you'd have made it.",
+            "Picture your busiest recent shift. Talk me through one coverage call you'd have made earlier than it actually happened, and what tipped you off.",
+            "Take it from here: orders are backing up but the queue at the till is short. Give me your version of the call you'd make out loud to the team.",
+          ]},
         ]},
         { heading: "Setting the tone, for a whole team now", blocks: [
           { type: "para", text: "Academy 2's Presence module taught you to manage your own state so it doesn't spread stress to customers. As a Shift Lead, the same principle applies to your teammates too — your calm (or your stress) sets the tone for the whole shift." },
@@ -46,7 +50,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "Why this step matters", blocks: [
           { type: "quote", text: "This is genuinely the first rung on a path that, eventually, can lead to becoming a Store Trainer — someone who helps carry Knoops' story and standards forward even when neither you nor Jens himself is standing in the room. That's a real, meaningful responsibility, and it starts here, with the everyday work of running a good shift." },
-          { type: "do", text: "Think of one specific moment from a recent shift where a Shift Lead made a good floor-coverage or tone-setting call. What made it work well? Write it down." },
+          { type: "do", variants: [
+            "Think of a shift where someone leading set a calm tone you could actually feel. Say what they did, and why it worked.",
+            "Bring to mind one good coverage call you saw a Shift Lead make. Talk me through what made it land well with the team.",
+            "Think of a leader, at Knoops or anywhere, whose steadiness you'd want to copy on a hard shift. Give me one specific thing they did and what made it work.",
+          ]},
         ]},
       ],
     },
@@ -65,18 +73,30 @@ window.ACADEMY_DATA = {
             { speaker: "Shift Lead", text: "Yeah, happens to everyone early on. What do you think would've been a good moment to ask?" },
           ]},
           { type: "para", text: "The Knoopologist caught their own mistake through a question, rather than being told. That's a small difference in words with a real difference in how much it actually sticks." },
-          { type: "do", text: "Take a common early mistake (skipping the strength question, rushing a recommendation, missing a small ask) and write a coaching question — not a correction — you could use to surface it." },
+          { type: "do", variants: [
+            "A new Knoopologist keeps skipping the strength question. Say the coaching question you'd ask them, not the correction.",
+            "Someone recommends a drink before they've really heard what the customer wants. Give me your version of a question that helps them notice it themselves.",
+            "Think of a small slip you made yourself early on. What question could a Shift Lead have asked to help you catch it?",
+          ]},
         ]},
         { heading: "Timing: right after, not later", blocks: [
           { type: "para", text: "Coaching lands best close to the moment it's about, while it's still fresh and specific — not saved up for a formal conversation hours or days later, by which point it can feel more like a review of past failures than help with something real and current." },
-          { type: "do", text: "Think of a recent moment where feedback would have landed better delivered right away versus how it was actually delivered. What was the gap?" },
+          { type: "do", variants: [
+            "Think of feedback you got days after the thing it was about. Say how it landed, and what would have changed if it had come straight away.",
+            "Bring to mind a time you held a small piece of feedback back until later. Talk me through what got lost in the wait.",
+            "Think of a moment on a recent shift that deserved a quick word right then. Say what you'd have said, and when.",
+          ]},
         ]},
         { heading: "Progress, named out loud", blocks: [
           { type: "para", text: "This is the \"progress equals fulfillment\" idea, made concrete: people feel genuinely good about work when they can see themselves getting better at it — and that feeling needs to be named out loud sometimes, not just felt internally." },
           { type: "dialogue", lines: [
             { speaker: "Shift Lead", text: "Hey — I noticed you caught yourself on the milk question before I even had to say anything. That's real progress from last week." },
           ]},
-          { type: "do", text: "Think of one specific piece of visible progress you could genuinely point out to a teammate this week. Write down exactly what you'd say." },
+          { type: "do", variants: [
+            "Think of a teammate who's got noticeably better at something recently. Say the exact words you'd use to name that progress to them.",
+            "Picture the newest person on your team. What real progress could you point to this week, and how would you say it to them?",
+            "Think of someone who's quietly improved without anyone mentioning it. Give me your version of the sentence that names it out loud.",
+          ]},
         ]},
         { heading: "When correction still needs to be direct", blocks: [
           { type: "para", text: "Coaching doesn't mean everything gets softened into a question. A genuine safety issue, a real mistake with real consequences, needs a direct, clear correction in the moment. Small, learning-curve mistakes get the coaching-question treatment; anything with real stakes gets handled directly and immediately, still warmly, but without ambiguity." },
@@ -86,7 +106,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "Coaching yourself, too", blocks: [
           { type: "para", text: "Everything in this module applies to you as well. Noticing your own progress, being honest with yourself about moments that didn't go as well as they could have, and treating your own growth with the same patience you're learning to extend to others." },
-          { type: "do", text: "Think of a real feedback moment you've been part of, on either side of it. Rewrite it using the \"ask before you tell\" and \"name the progress\" ideas from this module." },
+          { type: "do", variants: [
+            "Think of a correction you were once given that stung a little. Say how you'd deliver that same message now, asking before telling and naming the progress.",
+            "Bring to mind feedback you gave that came out blunter than you meant. Give me your version of it again, with a question first and the progress named.",
+            "Think of a moment from a recent shift you'd coach yourself on. Talk me through the question you'd ask yourself, and the progress you'd honestly name.",
+          ]},
         ]},
       ],
     },
@@ -112,9 +136,17 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Store Trainer", text: "That was really good — I liked how you picked up that they wanted something classic rather than pushing a flavor suggestion. One thing: try leaving a beat before you jump into the strength question, let them finish their sentence first." },
           ]},
-          { type: "do", text: "Think about what you'd actually watch for and comment on if you observed someone running a full four-question interview live. Write down two or three specific things you'd give feedback on." },
+          { type: "do", variants: [
+            "You're about to observe someone's first live four-question interview. Say two or three specific things you'd be watching for.",
+            "Think about signing someone off on the till and steaming milk during a real rush. Give me the specific things you'd watch and comment on.",
+            "Imagine you're observing hospitality at its most real, with a genuine customer in front of your trainee. Talk me through what you'd notice that a module alone could never test.",
+          ]},
           { type: "para", text: "Knowing what to say and being able to say it well are different skills, and the second one is entirely about delivery. The same feedback lands as encouragement or as criticism depending almost completely on tone — which is exactly the part you can't rehearse by writing it down." },
-          { type: "do", text: "You've just watched a new Knoopologist run their first four-question interview. They were warm and the customer left happy, but they skipped the milk question entirely and had to chase the customer down to ask. Deliver your feedback to them out loud, as you'd actually say it — name something real they did well first, then the fix, and keep it to under twenty seconds." },
+          { type: "do", variants: [
+            "You've just watched a new Knoopologist run a lovely, warm interview, but they recommended a drink before asking what the customer actually likes. Deliver your feedback out loud, as you'd really say it: something genuine they did well first, then the fix, under twenty seconds.",
+            "A new starter stayed calm with a tricky customer, but rushed the strength question so fast the customer just agreed to anything. Say your feedback out loud, real praise first, then the one fix, in under twenty seconds.",
+            "You've watched someone cover all four questions but keep their eyes on the cup the whole time, never on the customer. Give them your feedback out loud, exactly as you'd say it on shift: something real they did well, then the fix, under twenty seconds.",
+          ]},
         ]},
         { heading: "Documenting the sign-off", blocks: [
           { type: "para", text: "Once you're actually observing and certifying someone's live skills, that observation should get recorded — even simply — so the credential someone earns genuinely reflects both the digital and live halves of their training, not just the digital exam." },
@@ -125,7 +157,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "Carrying the founder's story forward", blocks: [
           { type: "para", text: "This connects directly to the very first thing you learned in Academy 1: Jens' story and energy don't automatically reach everyone, especially as Knoops keeps growing. As a Store Trainer, you're one of the people actually responsible for making sure that story lands — not by reciting it, but by genuinely caring about getting a new Knoopologist's onboarding right, the same way Jens cares about it in person. Module 5 goes deeper into this." },
-          { type: "do", text: "Think about your own onboarding, however it happened. What's one thing that genuinely helped you understand the job well, and one thing that felt missing or rushed?" },
+          { type: "do", variants: [
+            "Think back to your first week at Knoops. Say one thing that made the job click for you, and one thing you had to work out on your own.",
+            "Think of the best onboarding you've had at any job. What did that person do that you'd want to do for a new Knoopologist, and what would you do differently?",
+            "Picture a new starter arriving at your store next week. Say one part of your own onboarding you'd give them, and one part you'd fix.",
+          ]},
         ]},
       ],
     },
@@ -142,7 +178,11 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Store Trainer", text: "Hey team — quick reset, we're doing great, let's just take a breath and keep the flow going." },
           ]},
-          { type: "do", text: "Think of a time you could sense a whole team's energy shifting during a shift, even without anyone saying anything directly. What were the actual signs you picked up on?" },
+          { type: "do", variants: [
+            "Think of a shift where you could feel the team tightening up before anyone said a word. Say the actual signs you picked up on.",
+            "Bring to mind a shift where the energy lifted rather than dropped. Talk me through the signs that told you, before anyone said anything.",
+            "Think of a teammate whose stress you can usually spot early. Say what you actually notice in them, and how soon you notice it.",
+          ]},
         ]},
         { heading: "Noticing hospitality standards slipping", blocks: [
           { type: "para", text: "Sometimes, especially under pressure, small hospitality habits from Academy 2 quietly slip — greetings getting shorter, small asks getting handled a little more curtly. Part of leadership is noticing it early and gently, warmly, bringing the standard back up rather than letting it drift." },
@@ -161,7 +201,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "This isn't about control", blocks: [
           { type: "para", text: "\"Reading the store\" isn't about micromanaging every detail or hovering over every interaction — that would undercut the trust and autonomy that makes a good team actually work well together. It's about staying aware enough to notice when something genuinely needs your attention, and otherwise trusting your team, which they usually will earn if they've been coached (Module 2) rather than just corrected." },
-          { type: "do", text: "During your next few shifts in a leadership role, practice a periodic \"wide check\" — every fifteen or twenty minutes, briefly take stock of the line, the team's energy, and the space itself, without stopping what you're doing." },
+          { type: "do", variants: [
+            "On your next shift, run a wide check every fifteen or twenty minutes: the line, the team's energy, the space. Afterwards, say what you noticed that you'd otherwise have missed.",
+            "Pick one busy hour of your next shift and take stock of the whole floor three times during it, without stopping what you're doing. Give your answer on what changed between checks.",
+            "For your next few leadership shifts, practice noticing one thing about the line, one about the team, and one about the space each time you look up. Talk me through what a single wide check sounds like in your head.",
+          ]},
         ]},
       ],
     },
@@ -183,7 +227,11 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Store Trainer", text: "Before we open today — I want to tell you why this place exists, because it matters. In 2013, one guy in a small English town couldn't find a hot chocolate worth drinking anywhere, and decided to just make one himself... (on a new store's first day, before doors open)" },
           ]},
-          { type: "do", text: "Practice telling the Knoops founding story out loud, in your own words, in under two minutes, as though you were telling it to a brand-new team on their first day." },
+          { type: "do", variants: [
+            "Tell the Knoops founding story in your own words, in under a minute, as if you're welcoming one new hire on their first morning.",
+            "You've got a brand-new team in front of you before doors open. Say why this place exists, in your own words, in under two minutes.",
+            "A new starter asks what makes Knoops different from any other hot chocolate. Give them the real story, in your own words, in under two minutes.",
+          ]},
         ]},
         { heading: "Modeling the standard by example", blocks: [
           { type: "para", text: "New teams learn more from watching an experienced person work than from any amount of reading. Being genuinely present, warm, and skilled yourself — running a real four-question interview well, handling a small ask gracefully, staying calm under early-day chaos — teaches more than explaining those things ever could. This is Tell-Show-Do at its most literal: you're the \"Show.\"" },
@@ -202,7 +250,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "You don't need to be Jens", blocks: [
           { type: "para", text: "This module isn't about pretending to be the founder or performing a version of him you're not. It's about understanding what actually makes his approach work — genuine belief in the story, genuine skill modeled by example, genuine care for a new team — and bringing your own authentic version of those same things. The goal was never imitation. It's carrying the same underlying spirit forward, in your own way." },
-          { type: "do", text: "Think about your own first days at Knoops, or your own best memory of joining any team, anywhere. What made it feel like joining something real, versus just starting a job? Write down one or two specific things." },
+          { type: "do", variants: [
+            "Think of a team you were genuinely glad to join, anywhere. Say one or two specific things that made it feel real rather than just a job.",
+            "Think back to your first day at Knoops. What small thing made you feel part of something, and what would have made it stronger? Give your answer out loud.",
+            "Picture the end of a new starter's first day at your store. Say one or two things you'd genuinely do to make them feel they've joined something real.",
+          ]},
         ]},
       ],
     },
@@ -222,7 +274,11 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Store Trainer", text: "Hey — I've noticed the last few closing checklists have been running a bit fast. Totally get it's been a busy week, but let's make sure we're still doing the full routine, even when we're tired." },
           ]},
-          { type: "do", text: "Think of a standard (from any job, not just Knoops) that you've seen quietly drift over time. What would catching it early, gently, have looked like?" },
+          { type: "do", variants: [
+            "Think of a routine at a past job that quietly got shorter and shorter. Say what an early, gentle word about it could have sounded like.",
+            "Bring to mind an opening or closing routine that starts running fast on busy days. What would you say, warmly, to catch it now?",
+            "Think of a habit that slipped in a team you were part of, with nobody mentioning it until it was a big conversation. Talk me through the smaller conversation that could have happened first.",
+          ]},
         ]},
         { heading: "Consistency across the whole team, not just when you're watching", blocks: [
           { type: "para", text: "A real test of whether a standard has actually taken hold, versus just being performed for a manager's benefit, is what happens when leadership isn't directly watching. This isn't about surveillance — it's about building a team that holds the standard because they genuinely understand and believe in it, not because someone's checking. That kind of consistency only comes from real coaching (Module 2) and real modeling (Module 5), not from rules alone." },
@@ -235,7 +291,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "Why this is worth real leadership attention", blocks: [
           { type: "para", text: "Everything built across this whole platform — the story in Academy 1, the hospitality craft in Academy 2, the operational discipline in Academy 3 — only means something if it's actually what happens day to day, not just what's written down. This module is the piece that protects all of that: the ongoing, unglamorous work of keeping the real standard the real standard, especially on the days it would be easiest not to." },
-          { type: "do", text: "Think of one small standard at your store that's easy to let slip on a hard day. Write down one specific, gentle way you'd bring the team's attention back to it." },
+          { type: "do", variants: [
+            "Think of one standard at your store that always goes first when things get hard. Say one gentle, specific thing you'd say to bring it back.",
+            "It's been a rough week and greetings have got shorter. Give me your version of the reset you'd say to the team, warmly and without blame.",
+            "Pick a small habit at your store that slips when you're short-staffed. Talk me through how you'd bring the team's attention back to it without anyone feeling got at.",
+          ]},
         ]},
       ],
     },

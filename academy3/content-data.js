@@ -28,7 +28,11 @@ window.ACADEMY_DATA = {
             { speaker: "Opener", text: "Okay — power on, warmers going first since those take longest. While that heats up I'll check stock and get the float counted. Should be ready with time to spare before doors." },
           ]},
           { type: "para", text: "Notice the ordering logic: the thing that takes longest to be ready starts first, everything else fills in around it. That's the actual skill in a good opening — not doing more, doing things in the right order." },
-          { type: "do", text: "Once your store's real opening checklist exists, practice explaining the order of operations out loud — not just reading the list, explaining why it goes in that order." },
+          { type: "do", variants: [
+            "Once your store's real opening checklist exists, talk me through the first three things you'd do and why each one comes before the next.",
+            "Once you know your store's actual opening list, say how you'd explain to a brand new teammate why the equipment warm-up starts before the stock check.",
+            "Once your store's real opening checklist exists, picture an opening where you're running a few minutes behind. Which step still has to come first, and why?",
+          ]},
         ]},
         { heading: "Closing: the general shape", blocks: [
           { type: "para", text: "Closing has its own logic, roughly the reverse priority of opening, plus a layer opening doesn't need — leaving things genuinely ready for whoever opens tomorrow, not just clean enough to pass a glance." },
@@ -43,14 +47,22 @@ window.ACADEMY_DATA = {
             { speaker: "Closer", text: "We ran low on the oat milk around 4pm today, might be worth checking that first thing tomorrow before the morning rush." },
           ]},
           { type: "para", text: "That one sentence, written consistently, is worth more to the next shift than an immaculate but silent closing. This is exactly the kind of small handoff a Store Trainer relies on to keep a whole team coordinated without needing to be there every shift personally." },
-          { type: "do", text: "Practice writing a one-sentence handoff note for an imagined ordinary shift — the goal is brevity and usefulness, not a full report." },
+          { type: "do", variants: [
+            "Picture an ordinary shift with one small thing worth passing on. Give me your one-sentence handoff note for tomorrow's opener.",
+            "Say the handoff note you'd leave after a quiet close where nothing much happened, in a single useful sentence.",
+            "What would you say in one sentence to tomorrow's opener if you'd run low on something popular late in the day?",
+          ]},
         ]},
         { heading: "Why rushing the \"boring\" steps costs more than it saves", blocks: [
           { type: "para", text: "It's tempting, especially at the end of a long shift, to shortcut cleaning or reconciliation steps that feel less important than customer-facing work. They matter more than they seem, precisely because nobody notices them going right — only when they go wrong. A skipped equipment clean shows up as a taste issue days later. A rushed till count shows up as a headache for someone else entirely. The \"boring\" steps are boring because they're supposed to be invisible when done well — that's the sign of doing them right, not a reason to skip them." },
         ]},
         { heading: "Consistency over personal preference", blocks: [
           { type: "para", text: "Everyone develops their own rhythm for a routine they do often, and that's normal. What matters is that the actual steps — safety checks, equipment procedures, reconciliation — stay consistent regardless of who's doing them, so any Knoopologist can open or close confidently, and a Store Trainer can trust the routine happened properly without watching every single time." },
-          { type: "do", text: "Once you've shadowed a real opening or closing shift with an experienced teammate — a hands-on, live-observed skill — come back and write down the actual sequence for your store in your own words." },
+          { type: "do", variants: [
+            "Once you've shadowed a real opening with an experienced teammate, come back and talk me through your store's actual sequence in your own words.",
+            "Once you've been through a live closing shift with a teammate, take it from here: give your version of the steps, in the order your store actually does them.",
+            "Once you've shadowed a real open or close, say which steps have to stay the same no matter who's on shift, then run through them in your own words.",
+          ]},
         ]},
       ],
     },
@@ -67,7 +79,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "Perfect — so that's a 55% with hazelnut, oat milk. Great choice. (order entered) That'll be at the counter in just a few minutes." },
           ]},
           { type: "para", text: "Entering the order during the natural pause in conversation, not as an awkward silent gap, keeps the whole interaction feeling continuous." },
-          { type: "do", text: "Practice narrating an order entry out loud the way the example does — talking through what you're entering as you enter it, rather than going quiet." },
+          { type: "do", variants: [
+            "Take it from here: a customer's just asked for a 65% with orange and oat milk. Say how you'd talk them through it as you enter the order.",
+            "Give me your version of the moment right after the interview ends: a 55% with hazelnut and whole milk, entered without you going quiet.",
+            "How would you keep the conversation going while entering an order for two drinks at once? Say it the way you'd say it at the counter.",
+          ]},
         ]},
         { heading: "The numbered system, communicated clearly", blocks: [
           { type: "para", text: "Knoops stores commonly use a numbered-ticket system — a customer gets a number, and it's called when their drink is ready. The entire skill here is making sure the customer actually understands it clearly before walking away from the counter." },
@@ -87,7 +103,11 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Knoopologist", text: "That comes to $6.50 — how would you like to pay today?" },
           ]},
-          { type: "do", text: "Once you've learned your store's actual POS system hands-on, practice narrating a full payment exchange out loud the way the example does." },
+          { type: "do", variants: [
+            "Once you've learned your store's actual POS system hands-on, talk me through a card payment from confirming the total to handing the drink over.",
+            "Once you're hands-on with your store's real POS, give me your version of a cash payment that stays warm rather than going silent.",
+            "Once you know the actual POS, say what you'd say at payment for a customer paying for two drinks together, with the total confirmed clearly.",
+          ]},
         ]},
         { heading: "Order flow during a rush", blocks: [
           { type: "para", text: "Everything above gets harder, not easier, during a rush — exactly when it matters most. This ties directly to Module 5 (Staffing the Rush) and Academy 2's presence work: accurate order entry, clear number communication, and smooth payment all still need to happen, just faster." },
@@ -95,7 +115,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "60% orange, oat milk — number 31, few minutes, thank you! (already turning to the next customer, warmly)" },
           ]},
           { type: "para", text: "A wrong order taken quickly isn't actually faster — it just moves the delay to later, as a remake, with an extra apology attached. Speed and accuracy aren't in tension when the flow is well-practiced." },
-          { type: "do", text: "Once you've shadowed a real shift on the actual POS system, write out the full order-flow sequence in your own words — from \"what can I get you\" through payment." },
+          { type: "do", variants: [
+            "Once you've shadowed a real shift on the actual POS, talk me through the full order flow in your own words, from 'what can I get you' through payment.",
+            "Once you've worked a live shift on the real system, give your version of that same sequence at rush pace, where nothing gets dropped just because it's faster.",
+            "Once you've shadowed a real shift on the actual POS, take it from the first hello: say each step in order, including where the number gets given.",
+          ]},
         ]},
       ],
     },
@@ -113,7 +137,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "Just grabbed that delivery — washing up quick before I get back on drinks." },
           ]},
           { type: "para", text: "Said naturally, not apologetically — this is just part of the job." },
-          { type: "do", text: "Notice, over your next few shifts, how many natural moments call for a hand wash that might currently get skipped. Building the habit of noticing is most of the skill." },
+          { type: "do", variants: [
+            "Over your next few shifts, keep count of the moments that call for a hand wash. Which one is easiest to let slide when you're busy?",
+            "Think through a typical shift start to finish and name the points where washing up should happen. Noticing them is most of the skill.",
+            "Next time you're on, watch for the washes that come after cash, deliveries and cleaning. Say which of those you'd have to build the habit for.",
+          ]},
         ]},
         { heading: "Temperature: the invisible thing that matters most", blocks: [
           { type: "para", text: "Chocolate and dairy products both have real temperature requirements — held too warm for too long, ingredients can become unsafe well before they look or smell any different. This is one of the most important, least visible parts of the job. Know your store's holding-temperature requirements and time limits, and follow them exactly, every time — not \"usually,\" every time." },
@@ -125,11 +153,19 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "I have a dairy allergy, not just a preference — can you make sure everything's properly separate?" },
             { speaker: "Knoopologist", text: "Absolutely, I'll use clean tools and make sure nothing crosses over — thanks for letting me know, I take that seriously." },
           ]},
-          { type: "do", text: "Practice explaining, out loud, exactly what steps you'd take to keep a dairy-free order genuinely separate from start to finish — tools, surfaces, everything." },
+          { type: "do", variants: [
+            "Talk me through exactly how you'd keep an oat milk order separate from the dairy drink you just made: tools, surfaces, everything.",
+            "A customer tells you their dairy allergy is real, not a preference. Say the steps you'd take from taking the order through to handing it over.",
+            "Give me your version of the separation steps for a nut-free drink made during a busy stretch, start to finish.",
+          ]},
         ]},
         { heading: "A clean counter as a point of pride", blocks: [
           { type: "para", text: "Beyond formal procedures: does the space look, right now, like somewhere you'd be comfortable eating from yourself? Milk residue, crumbs, a sticky counter — none of these are dramatic, but they add up. This is a habit, not a checklist item — noticing small things and handling them immediately, not saving them for a scheduled clean." },
-          { type: "do", text: "During your next shift, notice how many small things you handle immediately versus how many you mentally note to deal with \"later.\" Later often doesn't come until it's become a bigger thing." },
+          { type: "do", variants: [
+            "On your next shift, keep track of the small messes you sort straight away versus the ones you leave for later. Which ones tend to get left?",
+            "Think about the counter at your busiest hour: name the small things that usually get put off, and say which one you'd start handling on the spot.",
+            "Look at your station the way a customer would see it right now. What would you deal with immediately rather than saving for a scheduled clean?",
+          ]},
         ]},
         { heading: "Why this doesn't feel optional", blocks: [
           { type: "para", text: "Everything in Academy 2 is about making someone feel genuinely cared for. A clean, safe counter is part of that same care — it's just the part that's invisible when done right and very visible when it isn't." },
@@ -150,7 +186,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "Good question — let's make sure we get you something totally safe. A few of our flavor add-ins do include nuts, but plenty don't, and I can make sure everything's prepared cleanly. What are you in the mood for, and I'll steer you toward the safe options?" },
           ]},
           { type: "para", text: "Calm, direct, taken seriously immediately — no minimizing (\"oh I'm sure it's fine\") and no overreacting either." },
-          { type: "do", text: "Write your own calm, direct response to a customer mentioning an allergy for the first time mid-conversation." },
+          { type: "do", variants: [
+            "A customer mentions a nut allergy halfway through choosing their drink. What would you say back, calm and direct, without making it a big deal?",
+            "Give me your version of the reply when someone says 'I'm allergic to dairy, is that a problem?' just as you're about to enter their order.",
+            "Take it from here: a customer brings up a soy allergy mid-conversation. Say your response, taking it seriously without overreacting.",
+          ]},
         ]},
         { heading: "When you genuinely don't know an ingredient detail", blocks: [
           { type: "para", text: "This is one of the most important honesty moments in the whole platform: if you're not certain whether something contains an allergen, say so plainly and check, rather than guessing. A guess that turns out wrong isn't a small mistake here — it's a real safety issue." },
@@ -158,7 +198,11 @@ window.ACADEMY_DATA = {
             { speaker: "Customer", text: "Does the caramel flavor have any dairy in the base, beyond the milk itself?" },
             { speaker: "Knoopologist", text: "That's a great question and I want to give you a completely accurate answer rather than guess — let me just double check the ingredient list before you order, one second." },
           ]},
-          { type: "do", text: "Practice saying \"let me double check before I guess\" out loud, in a tone that sounds confident and caring, not uncertain or apologetic." },
+          { type: "do", variants: [
+            "A customer asks whether the caramel base has dairy in it and you're not sure. Say how you'd tell them you're checking, in a tone that sounds confident rather than apologetic.",
+            "Give me your version of 'let me double check before I guess' for a customer asking about nuts in a syrup you've never used.",
+            "How would you say out loud that you don't know an ingredient detail, so it lands as care rather than uncertainty?",
+          ]},
         ]},
         { heading: "Plant-based milk as a genuine, equal option", blocks: [
           { type: "dialogue", lines: [
@@ -176,7 +220,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "This connects to trust, not just safety", blocks: [
           { type: "para", text: "How this conversation gets handled shapes whether a customer with dietary needs trusts your store enough to come back — and whether they'd recommend it to others who share the same concern. Handled carelessly even once can be the reason someone never comes back, and tells other people not to either." },
-          { type: "do", text: "Write out, in your own words, how you'd explain your allergen-handling practice to a nervous customer who's had a bad experience elsewhere. Aim for specific and confident, not vague." },
+          { type: "do", variants: [
+            "A customer says they've been let down at another shop. Talk me through how you'd explain your allergen handling to them, specific and confident rather than vague.",
+            "Give me your version of what you'd say to a parent who's nervous about ordering for a child with a nut allergy. Be specific about what you actually do.",
+            "How would you describe your cross-contamination practice to someone who asks how careful you really are? Aim for concrete steps, not reassurance.",
+          ]},
         ]},
       ],
     },
@@ -193,7 +241,11 @@ window.ACADEMY_DATA = {
           { type: "dialogue", lines: [
             { speaker: "Knoopologist", text: "I'll jump on drinks for a few minutes, orders are moving fine right now." },
           ]},
-          { type: "do", text: "Think through your store's typical rush and identify what the natural \"lanes\" are. Where would floating help most when things back up?" },
+          { type: "do", variants: [
+            "Picture your store at its busiest. Name the lanes you'd split into, and say where a floater would be most useful.",
+            "Talk me through a morning rush with three people on: who covers what, and what would tell someone it's time to leave their lane?",
+            "Think about the last time your counter backed up. Which lane got overloaded, and where would floating have helped most?",
+          ]},
         ]},
         { heading: "Communication, short and clear", blocks: [
           { type: "para", text: "During a rush, communication needs to get shorter without getting rude — quick, clear hand-offs rather than long explanations. It's easy to either over-communicate (slows everyone down) or under-communicate (leads to mistakes) under pressure." },
@@ -202,7 +254,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist 2", text: "Got it, I've got the next three orders queued, need a hand after this one." },
             { speaker: "Knoopologist 1", text: "On it." },
           ]},
-          { type: "do", text: "Practice a few short, clear hand-off phrases you could use during a rush — aim for under ten words each." },
+          { type: "do", variants: [
+            "Give me three hand-off phrases you'd use mid-rush, each under ten words and clear enough that nobody has to ask again.",
+            "Say how you'd call out a finished drink and ask for help on the next one, in as few words as you can without sounding sharp.",
+            "Take it from here: the drinks queue is backing up and you need a teammate to switch across. What would you say, short and clear?",
+          ]},
         ]},
         { heading: "Keeping the line informed, not just fast", blocks: [
           { type: "para", text: "A rush that feels chaotic to customers is worse than a rush that's honestly busy but calmly communicated. A brief, warm acknowledgment to a waiting line genuinely changes how people experience the wait." },
@@ -218,7 +274,11 @@ window.ACADEMY_DATA = {
             { speaker: "Knoopologist", text: "Good rush — let's restock the milk and get the counter reset before it picks back up." },
           ]},
           { type: "para", text: "A quick reset prevents the next rush from starting already behind." },
-          { type: "do", text: "Think back to the last genuinely busy period you were part of. What worked well about how the team coordinated, and what felt chaotic? Write down one thing you'd try differently." },
+          { type: "do", variants: [
+            "Think back to the last proper rush you worked. Say one thing the team did well, and one thing you'd try differently next time.",
+            "Picture the ten minutes right after a busy stretch ends. What would you reset first, and what would you flag to the team before it picks up again?",
+            "Talk me through a rush that felt chaotic. Where did the coordination break down, and what single change would you make?",
+          ]},
         ]},
       ],
     },
@@ -235,7 +295,11 @@ window.ACADEMY_DATA = {
             { speaker: "Opener", text: "Give me just one more minute — want to make sure this count's right before we open, it saves headaches later." },
           ]},
           { type: "para", text: "Rushing this step tends to cost more time later untangling a discrepancy than it saves in the moment." },
-          { type: "do", text: "Once you've learned your store's actual float-counting procedure hands-on, practice explaining out loud why doing it carefully matters, in your own words." },
+          { type: "do", variants: [
+            "Once you've learned your store's actual float-counting procedure hands-on, say how you'd explain to a new teammate why a careful count saves time later.",
+            "Once you've counted a real float with a teammate, give your version of why 'close enough' costs more than the minute it saves.",
+            "Once you know your store's real float procedure, talk me through what you'd say to someone rushing you to open the doors mid-count.",
+          ]},
         ]},
         { heading: "Handling transactions cleanly", blocks: [
           { type: "para", text: "Confirm the total out loud before payment, count change back clearly if handling cash, and never let a transaction feel rushed through in a way that makes it hard to catch an honest mistake before it becomes a real problem." },
@@ -251,7 +315,11 @@ window.ACADEMY_DATA = {
         ]},
         { heading: "When something feels off", blocks: [
           { type: "para", text: "If something ever feels genuinely wrong — a transaction that doesn't sit right, a till that doesn't reconcile and you can't figure out why — say so plainly to a Shift Lead or manager rather than trying to quietly fix or hide a discrepancy yourself. Flagging something honestly and promptly is never treated as a failure here." },
-          { type: "do", text: "Once you've learned your store's actual cash-handling procedure hands-on with a Store Trainer, write down the sequence in your own words — count, confirm, close." },
+          { type: "do", variants: [
+            "Once you've learned your store's actual cash-handling procedure hands-on with a Store Trainer, talk me through the sequence in your own words: count, confirm, close.",
+            "Once a Store Trainer has taken you through the real cash procedure, give your version of those steps, and say at which point you'd raise a count that doesn't add up.",
+            "Once you've done the actual cash-handling procedure hands-on, take it from the count: say each step in order, through to close.",
+          ]},
         ]},
       ],
     },
