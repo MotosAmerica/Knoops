@@ -68,13 +68,14 @@
       return;
     }
 
-    let trainees, progress, attempts, practice;
+    let trainees, progress, attempts, practice, ratings;
     try {
-      [trainees, progress, attempts, practice] = await Promise.all([
+      [trainees, progress, attempts, practice, ratings] = await Promise.all([
         fetchTable("trainees", "id,name,store_location,role,created_at"),
         fetchTable("module_progress", "trainee_id,academy,module_num,completed_at"),
         fetchTable("quiz_attempts", "trainee_id,academy,module_num,score,passed,created_at"),
         fetchTable("practice_responses", "trainee_id,academy,module_num,score,input_mode,created_at"),
+        fetchTable("module_ratings", "trainee_id,academy,module_num,q_useful,q_confident,q_practice,comment,created_at"),
       ]);
     } catch (e) {
       wrap.innerHTML = "";
@@ -128,12 +129,71 @@
     });
 
     renderStats(rows);
+    renderRatings(ratings || []);
     populateFilters(rows);
     renderTable(rows);
 
     document.getElementById("filter-search").addEventListener("input", () => renderTable(rows));
     document.getElementById("filter-store").addEventListener("change", () => renderTable(rows));
     document.getElementById("filter-academy").addEventListener("change", () => renderTable(rows));
+  }
+
+  // How trainees rate the training itself. The headline is deliberately
+  // "% who rated 4 or 5" rather than an average: it's the more honest read of
+  // the distribution, and it's the number that actually means something in a
+  // conversation ("9 in 10 said they learned something they could use").
+  const RATING_LABELS = [
+    ["q_useful",    "Learned something usable"],
+    ["q_confident", "Feel more confident"],
+    ["q_practice",  "Practice beat reading"],
+  ];
+
+  function renderRatings(ratings) {
+    const host = document.getElementById("tracker-ratings");
+    if (!host) return;
+    host.innerHTML = "";
+    if (!ratings.length) {
+      host.appendChild(el("div", "tracker-empty",
+        "No training ratings yet — these appear once someone finishes an academy's quiz."));
+      return;
+    }
+
+    host.appendChild(el("h2", "ratings-heading", "How trainees rate the training"));
+
+    const grid = el("div", "tracker-stats");
+    RATING_LABELS.forEach(([key, label]) => {
+      const vals = ratings.map((r) => r[key]).filter((v) => typeof v === "number");
+      const top = vals.filter((v) => v >= 4).length;
+      const pct = vals.length ? Math.round((top / vals.length) * 100) : 0;
+      const avg = vals.length
+        ? (vals.reduce((s, v) => s + v, 0) / vals.length).toFixed(1) : "—";
+      const box = el("div", "tracker-stat");
+      box.appendChild(el("div", "num", vals.length ? pct + "%" : "—"));
+      box.appendChild(el("div", "label", label));
+      box.appendChild(el("div", "sub", vals.length
+        ? `rated 4-5 · avg ${avg} · ${vals.length} response${vals.length === 1 ? "" : "s"}`
+        : "no responses"));
+      grid.appendChild(box);
+    });
+    host.appendChild(grid);
+
+    const comments = ratings
+      .filter((r) => r.comment && r.comment.trim())
+      .sort((a, b) => (b.created_at || "") > (a.created_at || "") ? 1 : -1);
+    if (comments.length) {
+      host.appendChild(el("h3", "ratings-subheading",
+        `What they said (${comments.length})`));
+      const list = el("div", "ratings-comments");
+      comments.slice(0, 25).forEach((c) => {
+        const item = el("div", "ratings-comment");
+        item.appendChild(el("div", "ratings-comment-text", `"${escapeHtml(c.comment.trim())}"`));
+        const meta = ACADEMY_CONFIG[c.academy] ? ACADEMY_CONFIG[c.academy].label : c.academy;
+        item.appendChild(el("div", "ratings-comment-meta",
+          `${escapeHtml(meta)}${c.created_at ? " · " + new Date(c.created_at).toLocaleDateString() : ""}`));
+        list.appendChild(item);
+      });
+      host.appendChild(list);
+    }
   }
 
   function renderStats(rows) {

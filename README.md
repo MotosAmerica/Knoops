@@ -104,6 +104,29 @@ Every `Do — practice` prompt across the reading modules is a real interactive 
 - **Manager tracker** (`tracker/index.html`) is a read-only dashboard: total signed in, average completion, who's fully certified, a store/academy filter, and a per-person progress bar with last-active date. It reads live from `trainees` + `module_progress` + `quiz_attempts` — nothing to configure. Like the rest of the platform, it has no password of its own; don't link it anywhere public.
 - **Progress sync**: every "Mark module complete" click (reading modules and quizzes) writes to `module_progress` (and `quiz_attempts` for quizzes, with the score) whenever someone's signed in and Supabase is connected — that's what feeds the tracker. If Supabase isn't reachable, local progress still works, it just won't show up for a manager until it's back.
 
+## Internal pages & access — a deliberate deferral
+
+Two pages are internal: `tracker/` (per-person progress) and `analytics/`
+(aggregate view of the whole platform). Neither is linked from anywhere in
+the site, both carry `noindex`, and `robots.txt` disallows them.
+
+**None of that is access control.** GitHub Pages serves everything in a public
+repo, so both pages are reachable by anyone who has the URL or reads the repo,
+and they display trainee names, comments and practice responses.
+
+Decision (Doug, Sept 2026): unlinked is fine for now, everything gets password
+protected eventually. That's a reasonable call while this is a blind build with
+no real staff on it. **The trigger to revisit is real Knoops staff signing in** —
+at that point this is other people's data, not test data, and the honest options
+are:
+
+- put the whole platform behind Supabase Auth (the DB is already there, and it
+  would also replace the no-password sign-in), or
+- deploy the two internal pages separately, somewhere private, pointed at the
+  same Supabase project.
+
+Worth deciding before the rollout rather than after.
+
 ## Notes / things to keep in mind
 - Everything in this build is designed to keep working with **zero backend** — the site is a complete, clickable demo even if Supabase were ever disconnected. Supabase adds the live AI grounding, real analytics, and the manager tracker.
 - The site is bespoke to Knoops (not multi-tenant), per your earlier decision — if you ever want to resell this to another counter-serve brand, that's a real second build, not a config flip.

@@ -1,0 +1,98 @@
+/* Knoops Academy — Analytics page
+   Layered on shared/styles.css; only what the dashboard adds. */
+
+.wrap--wide { max-width: 1120px; }
+.an-lede { font-size: 1rem; color: #555; max-width: 70ch; }
+.an-note { font-size: 0.86rem; color: #777; margin: 2px 0 14px; max-width: 72ch; line-height: 1.5; }
+.an-sub { font-size: 0.75rem; color: #999; margin-top: 3px; line-height: 1.35; }
+
+.an-section {
+  margin-top: 44px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(18,18,18,0.08);
+}
+.an-section:first-of-type { border-top: none; padding-top: 0; margin-top: 28px; }
+.an-section h2 { font-size: 1.25rem; margin: 0 0 2px; }
+.an-section h3 { font-size: 0.98rem; margin: 26px 0 2px; color: var(--knoops-brown); }
+
+.an-subkpis { margin-bottom: 8px; }
+.tracker-stat .sub { font-size: 0.72rem; color: #999; margin-top: 4px; line-height: 1.35; }
+
+.an-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+
+.an-controls { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.an-controls label { font-size: 0.85rem; color: #666; }
+.an-controls select {
+  padding: 8px 10px; min-height: 40px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(18,18,18,0.15); font-family: var(--knoops-font);
+  font-size: 0.9rem; background: var(--knoops-white);
+}
+
+/* ---- chart shells ---- */
+.an-chart { position: relative; }
+.an-svg { width: 100%; height: 150px; display: block; overflow: visible; }
+
+.an-tip {
+  position: absolute; z-index: 5; pointer-events: none;
+  background: var(--knoops-ink); color: #fff;
+  font-size: 0.78rem; line-height: 1.45;
+  padding: 7px 10px; border-radius: var(--radius-sm);
+  max-width: 200px; box-shadow: var(--shadow-lift);
+}
+
+/* ---- horizontal bars ---- */
+.an-hbars { display: grid; gap: 7px; }
+.an-hbar-row {
+  display: grid; grid-template-columns: minmax(120px, 34%) 1fr auto;
+  align-items: center; gap: 12px;
+  padding: 3px 4px; border-radius: var(--radius-sm);
+}
+.an-hbar-row:hover { background: rgba(154, 83, 46, 0.05); }
+.an-hbar-label {
+  font-size: 0.85rem; color: #333;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.an-hbar-track {
+  background: rgba(18,18,18,0.07); height: 10px; border-radius: 999px; overflow: hidden;
+}
+.an-hbar-fill { height: 100%; border-radius: 999px; transition: width 0.25s ease; }
+.an-hbar-value {
+  font-size: 0.82rem; color: #555; font-variant-numeric: tabular-nums;
+  min-width: 34px; text-align: right;
+}
+
+/* ---- vertical bar ticks ---- */
+.an-vbar-labels { display: flex; margin-top: 4px; }
+.an-vbar-cell { flex: 1; text-align: center; padding: 2px 0; border-radius: 3px; }
+.an-vbar-cell:hover { background: rgba(154, 83, 46, 0.06); }
+.an-vbar-tick { font-size: 0.7rem; color: #999; white-space: nowrap; }
+
+/* ---- tables ---- */
+.an-table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.an-table { min-width: 720px; }
+.an-table td { vertical-align: top; }
+
+/* ---- prompt / question lists ---- */
+.an-prompt-list { display: grid; gap: 10px; }
+.an-prompt {
+  display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: start;
+  background: var(--knoops-white); border: 1px solid rgba(18,18,18,0.08);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+}
+.an-prompt-score {
+  font-weight: 700; color: var(--knoops-brown); font-size: 0.95rem;
+  font-variant-numeric: tabular-nums; min-width: 32px;
+}
+.an-prompt-text { font-size: 0.9rem; line-height: 1.5; color: #333; }
+
+.an-footer { margin-top: 48px; font-size: 0.76rem; color: #aaa; }
+
+@media (max-width: 820px) {
+  .an-two-col { grid-template-columns: 1fr; gap: 24px; }
+}
+@media (max-width: 700px) {
+  .an-section { margin-top: 32px; padding-top: 22px; }
+  .an-hbar-row { grid-template-columns: minmax(90px, 42%) 1fr auto; gap: 8px; }
+  .an-hbar-label { font-size: 0.8rem; }
+  .an-svg { height: 130px; }
+}

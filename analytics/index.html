@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Analytics — Knoops Academy</title>
+<link rel="stylesheet" href="../shared/styles.css">
+<link rel="stylesheet" href="analytics.css">
+<link rel="icon" href="../assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon-16.png">
+<link rel="apple-touch-icon" href="../assets/favicon-180.png">
+</head>
+<body data-palette="#9A532E,#4A5FA5">
+<div class="topbar">
+  <div><span class="brand">Knoops Academy</span><span class="brand-sub">Analytics</span></div>
+</div>
+<div class="wrap wrap--wide">
+  <h1>Analytics</h1>
+  <p class="an-lede">Everything the platform records, in one place: who's training, what they're completing, how the AI practice is scoring, and what people think of the training itself.</p>
+  <div class="tracker-note">
+    Internal only, and deliberately not linked from anywhere in the platform.
+    Note this page is still reachable by anyone who knows the URL, and the repo is public —
+    treat the link as sensitive rather than assuming it's private.
+  </div>
+
+  <div id="an-error" class="tracker-empty" hidden></div>
+
+  <!-- Headline -->
+  <section id="an-kpis" class="an-section"></section>
+
+  <!-- Activity over time -->
+  <section class="an-section">
+    <h2>Activity over time</h2>
+    <p class="an-note">Every recorded event — module completions, quizzes, practice reps and ratings — by week.</p>
+    <div id="an-activity" class="an-chart"></div>
+  </section>
+
+  <!-- Academy comparison -->
+  <section class="an-section">
+    <h2>By academy</h2>
+    <p class="an-note">Where people are getting to, and how each academy is landing.</p>
+    <div id="an-academy-table"></div>
+  </section>
+
+  <!-- Where people stop -->
+  <section class="an-section">
+    <h2>Where people stop</h2>
+    <p class="an-note">Completions per module. A cliff between two bars is where an academy is losing people.</p>
+    <div class="an-controls">
+      <label for="an-funnel-academy">Academy</label>
+      <select id="an-funnel-academy"></select>
+    </div>
+    <div id="an-funnel" class="an-chart"></div>
+  </section>
+
+  <!-- Practice -->
+  <section class="an-section">
+    <h2>AI practice</h2>
+    <div id="an-practice-kpis" class="an-subkpis"></div>
+    <div class="an-two-col">
+      <div>
+        <h3>Score distribution</h3>
+        <p class="an-note">4 is the intended everyday score. A pile-up at 5, or a long tail at 1–2, means the grader needs recalibrating.</p>
+        <div id="an-score-dist" class="an-chart"></div>
+      </div>
+      <div>
+        <h3>Spoken vs typed</h3>
+        <p class="an-note">Whether the voice-first design is actually being used.</p>
+        <div id="an-input-mode" class="an-chart"></div>
+      </div>
+    </div>
+    <h3>Hardest prompts</h3>
+    <p class="an-note">Lowest average score, minimum 2 attempts. A consistently low prompt usually means the module didn't teach it clearly — not that people are failing.</p>
+    <div id="an-hard-prompts"></div>
+  </section>
+
+  <!-- Ratings -->
+  <section class="an-section">
+    <h2>How trainees rate the training</h2>
+    <div id="an-rating-kpis" class="an-subkpis"></div>
+    <h3>Star distribution</h3>
+    <p class="an-note">All three questions pooled. A long tail at 1&ndash;2 is worth reading the comments for.</p>
+    <div id="an-rating-dist" class="an-chart"></div>
+    <h3>What they said</h3>
+    <div id="an-comments"></div>
+  </section>
+
+  <!-- Ask the Founder -->
+  <section class="an-section">
+    <h2>Ask the Founder</h2>
+    <p class="an-note">What people actually want to know. Repeated questions are a content gap worth filling in a module.</p>
+    <div id="an-questions"></div>
+  </section>
+
+  <!-- Stores &amp; roles -->
+  <section class="an-section">
+    <h2>Stores &amp; roles</h2>
+    <div class="an-two-col">
+      <div>
+        <h3>Completion by store</h3>
+        <div id="an-by-store" class="an-chart"></div>
+      </div>
+      <div>
+        <h3>Signed in by role</h3>
+        <div id="an-by-role" class="an-chart"></div>
+      </div>
+    </div>
+  </section>
+
+  <p class="an-footer" id="an-generated"></p>
+</div>
+<script src="../shared/config.js"></script>
+<script src="analytics.js"></script>
+<script>KnoopsAnalytics.init();</script>
+</body>
+</html>

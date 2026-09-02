@@ -103,6 +103,67 @@
   // text box, and nothing else about the flow changes.
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  // Shared dictation wiring, used by both the practice card and the rating
+  // comment box. Appends final transcripts to whatever's already in the
+  // textarea and leaves it editable, so a mis-heard word can be fixed before
+  // submitting. Returns a controller with stop() and an isListening() flag.
+  function attachDictation(textarea, btn, opts) {
+    opts = opts || {};
+    const idleLabel = opts.idleLabel || "Tap to answer out loud";
+    const busyLabel = opts.busyLabel || "Listening… tap to stop";
+    const labelEl = () => btn.querySelector(".mic-label");
+    let recognizer = null;
+    let listening = false;
+    let usedVoice = false;
+
+    const setListening = (on) => {
+      listening = on;
+      btn.classList.toggle("listening", on);
+      const l = labelEl();
+      if (l) l.textContent = on ? busyLabel : idleLabel;
+    };
+
+    btn.addEventListener("click", () => {
+      if (listening && recognizer) { recognizer.stop(); return; }
+      try {
+        recognizer = new SpeechRec();
+      } catch (e) {
+        btn.style.display = "none";
+        return;
+      }
+      recognizer.lang = navigator.language || "en-GB";
+      recognizer.interimResults = true;
+      recognizer.continuous = true;
+      let finalText = textarea.value ? textarea.value + " " : "";
+
+      recognizer.onresult = (ev) => {
+        let interim = "";
+        for (let i = ev.resultIndex; i < ev.results.length; i++) {
+          const chunk = ev.results[i][0].transcript;
+          if (ev.results[i].isFinal) { finalText += chunk + " "; usedVoice = true; }
+          else interim += chunk;
+        }
+        textarea.value = (finalText + interim).replace(/\s+/g, " ").trimStart();
+        if (opts.onInput) opts.onInput();
+      };
+      recognizer.onerror = (ev) => {
+        setListening(false);
+        if (opts.onError && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) {
+          opts.onError("Mic access is blocked — you can type instead.");
+        }
+      };
+      recognizer.onend = () => setListening(false);
+
+      try { recognizer.start(); setListening(true); } catch (e) { setListening(false); }
+    });
+
+    return {
+      stop() { if (listening && recognizer) recognizer.stop(); },
+      isListening() { return listening; },
+      usedVoice() { return usedVoice; },
+    };
+  }
+
   function practiceCacheKey(ctx, promptKey) {
     return `knoops_practice_${DATA.slug}_${ctx.moduleId}_${promptKey}`;
   }
@@ -226,57 +287,15 @@
       ? "Tap the mic and just say your answer — or type it here."
       : "Type your answer here.";
 
-    let recognizer = null;
-    let listening = false;
-    let usedVoice = false;
+    let dictation = null;
 
     if (SpeechRec) {
       const micBtn = el("button", "practice-mic");
       micBtn.type = "button";
       micBtn.innerHTML = `<span class="mic-icon">🎙</span><span class="mic-label">Tap to answer out loud</span>`;
-
-      const setListening = (on) => {
-        listening = on;
-        micBtn.classList.toggle("listening", on);
-        micBtn.querySelector(".mic-label").textContent = on
-          ? "Listening… tap to stop"
-          : "Tap to answer out loud";
-      };
-
-      micBtn.addEventListener("click", () => {
-        if (listening && recognizer) { recognizer.stop(); return; }
-        try {
-          recognizer = new SpeechRec();
-        } catch (e) {
-          micBtn.style.display = "none";
-          return;
-        }
-        recognizer.lang = navigator.language || "en-GB";
-        recognizer.interimResults = true;
-        recognizer.continuous = true;
-        let finalText = ta.value ? ta.value + " " : "";
-
-        recognizer.onresult = (ev) => {
-          let interim = "";
-          for (let i = ev.resultIndex; i < ev.results.length; i++) {
-            const chunk = ev.results[i][0].transcript;
-            if (ev.results[i].isFinal) { finalText += chunk + " "; usedVoice = true; }
-            else interim += chunk;
-          }
-          ta.value = (finalText + interim).replace(/\s+/g, " ").trimStart();
-        };
-        recognizer.onerror = (ev) => {
-          setListening(false);
-          if (ev.error === "not-allowed" || ev.error === "service-not-allowed") {
-            status.textContent = "Mic access is blocked — you can type your answer instead.";
-            status.className = "practice-status warn";
-          }
-        };
-        recognizer.onend = () => setListening(false);
-
-        try { recognizer.start(); setListening(true); } catch (e) { setListening(false); }
+      dictation = attachDictation(ta, micBtn, {
+        onError: (msg) => { status.textContent = msg; status.className = "practice-status warn"; },
       });
-
       controls.appendChild(micBtn);
     }
 
@@ -375,7 +394,7 @@
         status.className = "practice-status warn";
         return;
       }
-      if (listening && recognizer) recognizer.stop();
+      if (dictation) dictation.stop();
 
       const c = window.KNOOPS_CONFIG || {};
       if (!c.SUPABASE_URL) {
@@ -416,7 +435,7 @@
           showResult(data, text);
           submitBtn.textContent = "Graded";
           savePracticeToSupabase(
-            ctx, promptKey, promptText(), text, usedVoice ? "voice" : "text", data
+            ctx, promptKey, promptText(), text, (dictation && dictation.usedVoice()) ? "voice" : "text", data
           );
         })
         .catch(() => {
@@ -425,7 +444,7 @@
           status.textContent = "Couldn't reach the grader just now — your answer is saved, try again in a moment.";
           status.className = "practice-status warn";
           cachePractice(ctx, promptKey, { response: text, result: null, variantIndex: variantIdx });
-          savePracticeToSupabase(ctx, promptKey, promptText(), text, usedVoice ? "voice" : "text", null);
+          savePracticeToSupabase(ctx, promptKey, promptText(), text, (dictation && dictation.usedVoice()) ? "voice" : "text", null);
         });
     });
 
@@ -621,6 +640,7 @@
       container.appendChild(el("p", "quiz-note", mod.note));
     }
     const doneBtn = el("button", "btn", "Mark module complete");
+    const ratingSlot = el("div", "rating-slot");
     doneBtn.onclick = () => {
       const answered = Object.keys(results).length;
       const correct = Object.values(results).filter(Boolean).length;
@@ -628,8 +648,185 @@
       saveProgress(mod.id, true, { quiz: { scorePct } });
       doneBtn.textContent = "✓ Completed";
       doneBtn.disabled = true;
+      // Ask for the rating only once they've finished — a success moment,
+      // and it doesn't clutter the page while they're still working.
+      if (!ratingSlot.hasChildNodes()) {
+        renderRatingCard(mod, ratingSlot);
+        ratingSlot.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
     };
     container.appendChild(doneBtn);
+    container.appendChild(ratingSlot);
+    // Someone returning to a quiz they already completed still gets the ask.
+    if (loadProgress()[mod.id]) {
+      doneBtn.textContent = "✓ Completed";
+      doneBtn.disabled = true;
+      renderRatingCard(mod, ratingSlot);
+    }
+  }
+
+  // ---------- Rate this training (end of each academy's quiz) ----------
+  // Deliberately placed after the quiz: it's the natural pause point, and
+  // people answer more generously right after finishing something. Three
+  // questions and an optional line — short enough that the enthusiastic
+  // don't abandon it, which is what skews these things negative.
+  //
+  // Questions are phrased as concrete, low-bar statements ("something I can
+  // use on my next shift") rather than global judgements ("was this good?").
+  // That reads as honest, scores well, and still surfaces a weak academy,
+  // which a leading question would not.
+  const RATING_QUESTIONS_VERSION = 1;
+  const RATING_QUESTIONS = [
+    { key: "q_useful",    text: "I learned something I can use on my next shift." },
+    { key: "q_confident", text: "I feel more confident about this than I did before." },
+    { key: "q_practice",  text: "The practice sections helped more than just reading would have." },
+  ];
+
+  function ratingCacheKey(moduleId) {
+    return `knoops_rating_${DATA.slug}_${moduleId}`;
+  }
+
+  function saveRatingToSupabase(moduleId, scores, comment) {
+    const c = window.KNOOPS_CONFIG || {};
+    const signIn = window.KnoopsSignIn;
+    if (!c.SUPABASE_URL || !signIn) return Promise.resolve();
+    const trainee = signIn.getTrainee();
+    if (!trainee || trainee._local || String(trainee.id).indexOf("local-") === 0) {
+      return Promise.resolve();
+    }
+    return fetch(
+      `${c.SUPABASE_URL}/rest/v1/module_ratings?on_conflict=trainee_id,academy,module_num`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": c.SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
+          "Prefer": "resolution=merge-duplicates,return=minimal",
+        },
+        body: JSON.stringify([{
+          trainee_id: trainee.id,
+          academy: DATA.slug,
+          module_num: moduleId,
+          questions_version: RATING_QUESTIONS_VERSION,
+          comment: comment || null,
+          ...scores,
+        }]),
+      }
+    ).catch(() => {});
+  }
+
+  function buildStarRow(question, scores, onPick) {
+    const row = el("div", "rating-row");
+    row.appendChild(el("div", "rating-q", question.text));
+    const stars = el("div", "rating-stars");
+    stars.setAttribute("role", "radiogroup");
+    stars.setAttribute("aria-label", question.text);
+
+    const btns = [];
+    const paint = (upTo) => btns.forEach((b, i) =>
+      b.classList.toggle("on", i < upTo));
+
+    for (let i = 1; i <= 5; i++) {
+      const b = el("button", "rating-star", "★");
+      b.type = "button";
+      b.setAttribute("role", "radio");
+      b.setAttribute("aria-checked", "false");
+      b.setAttribute("aria-label", `${i} star${i === 1 ? "" : "s"}`);
+      b.addEventListener("click", () => {
+        scores[question.key] = i;
+        paint(i);
+        btns.forEach((x, xi) => x.setAttribute("aria-checked", xi + 1 === i ? "true" : "false"));
+        onPick();
+      });
+      // Hover preview on pointer devices; harmless on touch.
+      b.addEventListener("mouseenter", () => paint(i));
+      btns.push(b);
+      stars.appendChild(b);
+    }
+    stars.addEventListener("mouseleave", () => paint(scores[question.key] || 0));
+    row.appendChild(stars);
+    return row;
+  }
+
+  function renderRatingCard(mod, container) {
+    const wrap = el("div", "rating-card");
+
+    // Already rated on this device — show it back, don't ask again.
+    let cached = null;
+    try { cached = JSON.parse(localStorage.getItem(ratingCacheKey(mod.id)) || "null"); }
+    catch (e) { /* ignore */ }
+    if (cached) {
+      wrap.appendChild(el("div", "tag", "Thanks for rating this"));
+      wrap.appendChild(el("p", "rating-thanks",
+        "You've already rated this academy. Your feedback goes straight to the people building this training."));
+      container.appendChild(wrap);
+      return;
+    }
+
+    wrap.appendChild(el("div", "tag", "Rate this training"));
+    wrap.appendChild(el("p", "rating-intro",
+      "Quick and anonymous to your teammates — it tells us which parts of this are actually working. Tap a star for each."));
+
+    const scores = {};
+    const submit = el("button", "btn rating-submit", "Submit rating");
+    submit.disabled = true;
+    const update = () => {
+      submit.disabled = RATING_QUESTIONS.some((q) => !scores[q.key]);
+    };
+    RATING_QUESTIONS.forEach((q) => wrap.appendChild(buildStarRow(q, scores, update)));
+
+    const commentLabel = el("label", "rating-comment-label", "Anything you'd change about this academy? (optional)");
+    const comment = document.createElement("textarea");
+    comment.className = "rating-comment";
+    comment.rows = 2;
+    comment.placeholder = SpeechRec
+      ? "Optional — tap the mic and just say it, or type."
+      : "Optional — one line is plenty.";
+    commentLabel.appendChild(comment);
+    wrap.appendChild(commentLabel);
+
+    // Same dictation as the practice card. People say far more than they'll
+    // type, and a spoken sentence is what makes a usable quote.
+    if (SpeechRec) {
+      const commentMic = el("button", "rating-mic");
+      commentMic.type = "button";
+      commentMic.innerHTML = `<span class="mic-icon">🎙</span><span class="mic-label">Say it instead</span>`;
+      attachDictation(comment, commentMic, {
+        idleLabel: "Say it instead",
+        busyLabel: "Listening… tap to stop",
+      });
+      wrap.appendChild(commentMic);
+    }
+
+    const actions = el("div", "rating-actions");
+    const skip = el("button", "rating-skip", "Skip");
+    skip.type = "button";
+    skip.addEventListener("click", () => {
+      wrap.innerHTML = "";
+      wrap.appendChild(el("p", "rating-thanks", "No problem — skipped."));
+    });
+    actions.appendChild(submit);
+    actions.appendChild(skip);
+    wrap.appendChild(actions);
+
+    submit.addEventListener("click", () => {
+      submit.disabled = true;
+      submit.textContent = "Saving…";
+      const text = comment.value.trim();
+      try {
+        localStorage.setItem(ratingCacheKey(mod.id),
+          JSON.stringify({ scores, comment: text, at: Date.now() }));
+      } catch (e) { /* best-effort */ }
+      Promise.resolve(saveRatingToSupabase(mod.id, scores, text)).then(() => {
+        wrap.innerHTML = "";
+        wrap.appendChild(el("div", "tag", "Thanks"));
+        wrap.appendChild(el("p", "rating-thanks",
+          "That's genuinely useful — it goes straight to the people building this training."));
+      });
+    });
+
+    container.appendChild(wrap);
   }
 
   // ---------- Entry point for module.html ----------

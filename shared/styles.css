@@ -379,6 +379,87 @@ a { color: var(--knoops-brown); }
 .tracker-empty { text-align: center; padding: 40px; color: #888; }
 .tracker-note { background: #FFF6E5; border: 1px solid var(--knoops-tan); border-radius: var(--radius-sm); padding: 12px 16px; font-size: 0.85rem; color: #6b4a1c; margin-bottom: 20px; }
 
+/* ---------- Rate this training (end of each academy's quiz) ---------- */
+.rating-card {
+  background: var(--knoops-white);
+  border: 1px solid rgba(18,18,18,0.1);
+  border-left: 3px solid var(--knoops-tan);
+  border-radius: var(--radius-md);
+  padding: 20px 22px;
+  margin: 24px 0 8px;
+  box-shadow: var(--shadow-soft);
+}
+.rating-card .tag {
+  font-weight: 700; color: var(--knoops-brown); text-transform: uppercase;
+  font-size: 0.75rem; letter-spacing: 0.05em;
+}
+.rating-intro { margin: 8px 0 18px; font-size: 0.93rem; color: #555; }
+.rating-thanks { margin: 8px 0 0; font-size: 0.95rem; color: #444; }
+
+.rating-row { margin-bottom: 16px; }
+.rating-q { font-size: 0.95rem; margin-bottom: 6px; line-height: 1.45; }
+.rating-stars { display: flex; gap: 4px; }
+.rating-star {
+  background: none; border: none; cursor: pointer;
+  font-size: 1.9rem; line-height: 1;
+  /* 44px minimum touch target on a phone */
+  min-width: 44px; min-height: 44px;
+  padding: 0; color: rgba(18,18,18,0.18);
+  transition: color 0.12s ease, transform 0.06s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.rating-star:hover { transform: scale(1.06); }
+.rating-star.on { color: var(--knoops-tan); }
+.rating-star:focus-visible { outline: 2px solid var(--knoops-brown); outline-offset: 2px; border-radius: 4px; }
+
+.rating-comment-label {
+  display: block; margin-top: 18px; font-size: 0.88rem; color: #555;
+}
+.rating-comment {
+  display: block; width: 100%; margin-top: 6px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(18,18,18,0.15); padding: 10px;
+  font-family: var(--knoops-font); font-size: 1rem; /* 1rem avoids iOS zoom */
+  box-sizing: border-box; resize: vertical;
+}
+.rating-mic {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 8px; min-height: 44px; padding: 0 16px;
+  border: 1px solid var(--knoops-brown); border-radius: var(--radius-sm);
+  background: none; color: var(--knoops-brown);
+  font-family: var(--knoops-font); font-size: 0.88rem; font-weight: 600;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.rating-mic:hover { background: rgba(154, 83, 46, 0.08); }
+.rating-mic .mic-icon { font-size: 1.05rem; line-height: 1; }
+.rating-mic.listening {
+  background: #B3402B; border-color: #B3402B; color: #fff;
+  animation: practice-pulse 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) { .rating-mic.listening { animation: none; } }
+
+.rating-actions { display: flex; align-items: center; gap: 16px; margin-top: 18px; }
+.rating-submit { min-height: 44px; }
+.rating-skip {
+  background: none; border: none; color: #888; cursor: pointer;
+  font-family: var(--knoops-font); font-size: 0.88rem; min-height: 44px;
+  text-decoration: underline;
+}
+.rating-skip:hover { color: #555; }
+
+/* ---------- Tracker: how trainees rate the training ---------- */
+.tracker-ratings { margin-top: 40px; }
+.ratings-heading { font-size: 1.25rem; margin: 0 0 4px; }
+.ratings-subheading { font-size: 1rem; margin: 28px 0 12px; color: var(--knoops-brown); }
+.tracker-stat .sub { font-size: 0.72rem; color: #999; margin-top: 4px; line-height: 1.35; }
+.ratings-comments { display: grid; gap: 12px; }
+.ratings-comment {
+  background: var(--knoops-white); border: 1px solid rgba(18,18,18,0.08);
+  border-left: 3px solid var(--knoops-tan);
+  border-radius: var(--radius-sm); padding: 12px 16px;
+}
+.ratings-comment-text { font-size: 0.95rem; line-height: 1.5; color: #333; }
+.ratings-comment-meta { font-size: 0.76rem; color: #999; margin-top: 6px; }
+
 /* ---------------------------------------------------------------------------
    Phone layout
    Most Knoopologists will use this on a handset, often one-handed on a break.
@@ -441,6 +522,8 @@ a { color: var(--knoops-brown); }
 
   .screen { padding: 18px 16px; }
   .do-prompt { padding: 14px 16px; }
+  .rating-card { padding: 16px; }
+  .rating-star { font-size: 1.75rem; }
   .hub-grid { grid-template-columns: 1fr; gap: 16px; }
 
   /* Tracker tables can't shrink below their content — scroll them instead of

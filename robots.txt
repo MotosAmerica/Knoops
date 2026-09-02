@@ -1,0 +1,8 @@
+# The trainee-facing academies are fine to index.
+# The internal pages are not linked from anywhere and shouldn't turn up in a
+# search result. This is discouragement, not access control — both pages are
+# still reachable by anyone who has the URL. Real protection comes when the
+# platform moves behind authentication.
+User-agent: *
+Disallow: /tracker/
+Disallow: /analytics/
