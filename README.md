@@ -104,28 +104,70 @@ Every `Do — practice` prompt across the reading modules is a real interactive 
 - **Manager tracker** (`tracker/index.html`) is a read-only dashboard: total signed in, average completion, who's fully certified, a store/academy filter, and a per-person progress bar with last-active date. It reads live from `trainees` + `module_progress` + `quiz_attempts` — nothing to configure. Like the rest of the platform, it has no password of its own; don't link it anywhere public.
 - **Progress sync**: every "Mark module complete" click (reading modules and quizzes) writes to `module_progress` (and `quiz_attempts` for quizzes, with the score) whenever someone's signed in and Supabase is connected — that's what feeds the tracker. If Supabase isn't reachable, local progress still works, it just won't show up for a manager until it's back.
 
-## Internal pages & access — a deliberate deferral
+## Where this is hosted (updated Sept 4, 2026)
 
-Two pages are internal: `tracker/` (per-person progress) and `analytics/`
-(aggregate view of the whole platform). Neither is linked from anywhere in
-the site, both carry `noindex`, and `robots.txt` disallows them.
+**Live at https://knoops.oneteamos.com** — served from Namecheap shared hosting
+(cPanel account `motokqtq`, docroot `/home/motokqtq/knoops.oneteamos.com`),
+not GitHub Pages.
 
-**None of that is access control.** GitHub Pages serves everything in a public
-repo, so both pages are reachable by anyone who has the URL or reads the repo,
-and they display trainee names, comments and practice responses.
+**Deploy loop:** commit and push in GitHub Desktop → cPanel → *Git Version
+Control* → *Update from Remote* → *Deploy HEAD Commit*. The server-side clone
+lives at `/home/motokqtq/repos/knoops`.
 
-Decision (Doug, Sept 2026): unlinked is fine for now, everything gets password
-protected eventually. That's a reasonable call while this is a blind build with
-no real staff on it. **The trigger to revisit is real Knoops staff signing in** —
-at that point this is other people's data, not test data, and the honest options
-are:
+`.cpanel.yml` drives that deploy and is a **whitelist** — it publishes only the
+files a browser needs. The AI grading rubric
+(`supabase/functions/knoops-academy-ai/index.ts`), the schema, the migrations
+and every `.md` doc are therefore *not* on the web server at all. Verified:
+those paths return 404 in production. If you add a sixth academy, add its three
+lines to `.cpanel.yml` or it won't publish — that's the intended trade.
 
-- put the whole platform behind Supabase Auth (the DB is already there, and it
-  would also replace the no-password sign-in), or
-- deploy the two internal pages separately, somewhere private, pointed at the
-  same Supabase project.
+Gotcha worth remembering: if cPanel says *"The system cannot deploy"* right
+after a pull, **reload the page before believing it**. It caches deployability
+state and shows that message stale. A fresh load flipped it to "includes new
+deployable changes" and the deploy ran first time.
 
-Worth deciding before the rollout rather than after.
+## Internal pages & access
+
+`tracker/` and `analytics/` are **open** — they return 200 to anyone with the
+URL. Neither is linked from anywhere in the platform, both carry `noindex`, and
+`robots.txt` disallows them, but that is obscurity, not access control.
+
+They were briefly behind cPanel Directory Privacy (HTTP basic auth) on Sept 4,
+2026. **Decision (Doug, same day): turned back off.** Basic auth had been
+enabled before any user account existed, which locked everyone out including
+Doug, and creating that account requires a password typed by a human. Doug chose
+to revert to the earlier "unlinked is fine" posture rather than do that today.
+
+To re-protect: cPanel → Directory Privacy → into `knoops.oneteamos.com` → Edit
+on the directory → tick "Password protect this directory" → Save → then
+**Create User** on the same screen. Do the Create User step in the same sitting;
+protection without a user is a locked door with no key cut. The two directories
+keep separate user lists, so repeat for both (same credentials are fine).
+
+Worth doing before real Knoops staff put data in: `analytics/` shows trainee
+names, their typed and spoken practice answers, scores, and free-text comments
+about the training. The same open-by-default caveat applies to Supabase — RLS is
+still `using (true)`, and the anon key is public by design, so RLS is the only
+thing standing between the URL and the data.
+
+**Decision (Doug, Sept 4, 2026): the GitHub repo stays public for now.**
+Private repos are free, but GitHub Pages from a private repo needs the $4/user
+Team plan — which was why it went public originally. That constraint is gone
+now the site is off Pages, so going private is free whenever wanted; it just
+wasn't judged worth the setup today. The honest position: the new URL changes
+what people *see*, not what's *discoverable* — `MotosAmerica/Knoops` is still
+findable by searching GitHub. What it does buy is that the rubric, schema and
+docs are no longer served from the demo site itself.
+
+If/when the repo does go private, cPanel's clone will break — it currently
+pulls over public HTTPS. It'll need a read-only deploy key (cPanel → SSH
+Access → Manage SSH Keys → add the public key to the repo's Deploy keys) and
+the remote URL switched to `git@github.com:MotosAmerica/Knoops.git`.
+
+**Still outstanding:** Supabase row-level security is wide open
+(`using (true)`). Fine with test data; needs tightening before real Knoops
+staff sign in, since the anon key is in `shared/config.js` by design and RLS is
+the only thing behind it.
 
 ## Notes / things to keep in mind
 - Everything in this build is designed to keep working with **zero backend** — the site is a complete, clickable demo even if Supabase were ever disconnected. Supabase adds the live AI grounding, real analytics, and the manager tracker.
