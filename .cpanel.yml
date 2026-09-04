@@ -1,0 +1,56 @@
+---
+# cPanel Git Version Control deployment for knoops.oneteamos.com
+#
+# Runs when you hit "Deploy HEAD Commit" in cPanel (Git Version Control), or
+# on `git push` to the server-side clone if you've wired that up.
+#
+# IMPORTANT — this is a WHITELIST, on purpose.
+# It copies only the files a browser needs. The repo also contains things that
+# must never be web-accessible:
+#   supabase/functions/knoops-academy-ai/index.ts  <- the AI grading rubric
+#   supabase/migrations/*.sql                      <- the schema
+#   README.md, *-spec.md, audit-*.md               <- the architecture, written out
+# Listing what to publish, rather than what to exclude, means a new doc or
+# migration added later is private by default instead of accidentally public.
+#
+# SET DEPLOYPATH to your real docroot before first use — cPanel shows it when
+# you create the subdomain (Domains → knoops.oneteamos.com). It usually looks
+# like /home/YOURUSER/knoops.oneteamos.com.
+
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/motokqtq/knoops.oneteamos.com
+    - /bin/mkdir -p $DEPLOYPATH
+
+    # --- entry point + crawler rules ---
+    - /bin/cp index.html $DEPLOYPATH/
+    - /bin/cp robots.txt $DEPLOYPATH/
+    - /bin/cp .htaccess $DEPLOYPATH/
+
+    # --- shared engine, styles, config ---
+    - /bin/mkdir -p $DEPLOYPATH/shared
+    - /bin/cp shared/app-common.js shared/signin.js shared/knoops-stores.js shared/config.js shared/styles.css $DEPLOYPATH/shared/
+
+    # --- brand assets ---
+    - /bin/mkdir -p $DEPLOYPATH/assets
+    - /bin/cp -R assets/. $DEPLOYPATH/assets/
+
+    # --- the five academies ---
+    - /bin/mkdir -p $DEPLOYPATH/academy1 $DEPLOYPATH/academy2 $DEPLOYPATH/academy3 $DEPLOYPATH/academy4 $DEPLOYPATH/academy5
+    - /bin/cp academy1/index.html academy1/module.html academy1/content-data.js $DEPLOYPATH/academy1/
+    - /bin/cp academy2/index.html academy2/module.html academy2/content-data.js $DEPLOYPATH/academy2/
+    - /bin/cp academy3/index.html academy3/module.html academy3/content-data.js $DEPLOYPATH/academy3/
+    - /bin/cp academy4/index.html academy4/module.html academy4/content-data.js $DEPLOYPATH/academy4/
+    - /bin/cp academy5/index.html academy5/module.html academy5/content-data.js $DEPLOYPATH/academy5/
+
+    # --- internal pages (password-protect these in cPanel → Directory Privacy) ---
+    - /bin/mkdir -p $DEPLOYPATH/tracker $DEPLOYPATH/analytics
+    - /bin/cp tracker/index.html tracker/tracker.js $DEPLOYPATH/tracker/
+    - /bin/cp analytics/index.html analytics/analytics.js analytics/analytics.css $DEPLOYPATH/analytics/
+
+    # --- belt and braces: if anything sensitive ever lands in the docroot
+    #     (a stray copy, a manual upload), remove it on every deploy ---
+    - /bin/rm -rf $DEPLOYPATH/supabase
+    - /usr/bin/find $DEPLOYPATH -maxdepth 2 -name "*.md" -type f -delete
+    - /usr/bin/find $DEPLOYPATH -maxdepth 2 -name "*.sql" -type f -delete
+    - /usr/bin/find $DEPLOYPATH -maxdepth 3 -name "*.ts" -type f -delete

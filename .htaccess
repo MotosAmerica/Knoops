@@ -1,0 +1,70 @@
+# knoops.oneteamos.com — Knoops Academy
+# LiteSpeed/Apache config. Two jobs: keep internal files unreachable, and
+# put the two internal pages behind a password.
+
+# ---------------------------------------------------------------------------
+# 1. Never serve source, docs, data or version-control files.
+#    Nothing here should exist in the deploy bundle anyway — this is a
+#    second line of defence in case something gets uploaded by accident.
+# ---------------------------------------------------------------------------
+<FilesMatch "\.(md|sql|ts|tsx|json|lock|yml|yaml|toml|env|bak|log|sh)$">
+  Require all denied
+</FilesMatch>
+
+RedirectMatch 404 /\.git
+RedirectMatch 404 /supabase/
+RedirectMatch 404 /\.(?!well-known)
+
+Options -Indexes
+
+# ---------------------------------------------------------------------------
+# 2. Baseline security headers
+# ---------------------------------------------------------------------------
+<IfModule mod_headers.c>
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Speech recognition needs the mic; nothing else does.
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=(self)"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# 3. Cache: assets can be cached hard, HTML and content must not be, or
+#    trainees will sit on a stale module after you push an update.
+# ---------------------------------------------------------------------------
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType image/png "access plus 30 days"
+  ExpiresByType image/x-icon "access plus 30 days"
+  ExpiresByType text/css "access plus 1 hour"
+  ExpiresByType application/javascript "access plus 1 hour"
+  ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
+
+# ---------------------------------------------------------------------------
+# 4. Password-protect the internal pages ONLY (the academies stay open so the
+#    demo just works).
+#
+#    EASIEST ROUTE — do this in cPanel instead of by hand:
+#      cPanel → Directory Privacy → knoops.oneteamos.com/tracker  → tick
+#      "Password protect this directory", add a user. Repeat for /analytics.
+#      cPanel writes the .htpasswd file and the correct absolute path for you.
+#
+#    If you'd rather do it manually, uncomment the blocks below and set
+#    AuthUserFile to the ABSOLUTE server path of your .htpasswd file (put it
+#    ABOVE public_html so it can't be downloaded), e.g.
+#      /home/motokqtq/.htpasswd-knoops
+# ---------------------------------------------------------------------------
+# <Directory "/home/motokqtq/knoops.oneteamos.com/tracker">
+#   AuthType Basic
+#   AuthName "Knoops Academy — internal"
+#   AuthUserFile "/home/motokqtq/.htpasswd-knoops"
+#   Require valid-user
+# </Directory>
+#
+# <Directory "/home/motokqtq/knoops.oneteamos.com/analytics">
+#   AuthType Basic
+#   AuthName "Knoops Academy — internal"
+#   AuthUserFile "/home/motokqtq/.htpasswd-knoops"
+#   Require valid-user
+# </Directory>
