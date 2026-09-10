@@ -57,3 +57,79 @@ Push to GitHub, then *Update from Remote* → *Deploy HEAD Commit* in cPanel. No
 **Doesn't:** hide the frontend HTML/CSS/JS. That's delivered to every visitor's browser by definition — true of every website ever made. Someone determined can copy the markup and the styling. What they cannot get is the curriculum's provenance, the grading rubric, the Supabase project, or you.
 
 **Still outstanding:** the Supabase row-level security policies are currently wide open (`using (true)`), which means the anon key in `shared/config.js` — which is *supposed* to be public, that part is normal — is the only thing standing between a curious visitor and every trainee's name, comments and practice answers. That's fine with only test data in it. It needs fixing before real Knoops staff sign in, and it's a separate job from this deploy.
+
+---
+
+## Pull when auth ships
+
+Everything in this section is **demo scaffolding**. It exists because the platform
+currently has no access control: sign-in is an identity prompt, not an auth gate
+(`shared/signin.js` — "it never gates any academy content"), every academy is
+reachable by URL, and role does nothing but decide whether the Team Progress link
+appears in the topbar. Copy that promised gating was therefore describing behaviour
+the build does not have.
+
+**Precondition — do not start this list until the gate actually works.** "Works"
+means, tested against a real account with a non-leadership role:
+
+1. `academy5/index.html` and `academy5/module.html?m=1` refuse to render content —
+   not just hide the card on the hub. Typing the URL must not work.
+2. The refusal survives a page reload and a fresh browser (i.e. it is enforced
+   server-side or by a real session, not by a JS flag any visitor can flip in
+   devtools).
+3. A role change to Shift Lead / Store Trainer / Store Manager grants access
+   without a redeploy.
+4. If knowledge checks are meant to gate too: failing Academy 1 Module 6 blocks
+   Academy 2, and passing it unblocks it, both verified live.
+
+If any of those four is not true, the copy is still lying — leave it alone.
+
+### 1. Remove the DEMO-ONLY blocks
+
+Search the repo for `DEMO-ONLY` and remove each marked block.
+
+> **Status as of 10 Sept 2026: this search returns nothing.** There are no
+> `DEMO-ONLY` markers anywhere in the repo — not in the HTML, the content-data
+> files, the shared JS, or the CSS. Either they were never added, or they live in
+> a different project. Add the markers before relying on this step, or treat
+> section 2 below as the authoritative list of what to undo.
+
+### 2. Restore the gating copy
+
+These strings were softened on 10 Sept 2026 because the gate they described does
+not exist. Restore them **only** once the precondition above passes. Exact
+before/after so this is a mechanical revert:
+
+| File | Currently reads | Restore to |
+|---|---|---|
+| `index.html` (intro, ~line 20) | `Academy 5 is for staff in or entering a leadership role.` | `Academy 5 unlocks once you're on the leadership track.` |
+| `index.html` (Academy 5 card, ~line 46) | `For staff in or entering a leadership role.` | `For staff in or entering a leadership role. Unlocks on promotion.` |
+| `academy5/content-data.js` (`description`, ~line 7) | `For staff in or entering a leadership role. Not part of the universal sequence.` | `For staff in or entering a leadership role. Not part of the universal sequence — unlocks on promotion.` |
+| `academy5/content-data.js` (header comment, line 1) | `(aimed at the leadership track, not universal)` | `(gated to leadership track, not universal)` |
+
+The fourth item on the original change list — Academy 1 Module 5's closing line
+`gating your move into Academy 2` — **was not found and was not changed.** No form
+of the word "gate" appears anywhere in `academy1/content-data.js`. The nearest
+string is the Module 6 summary, `"A short check before moving into Academy 2."`,
+which is already non-gating and needs nothing done to it in either direction.
+
+### 3. Re-check the rest of the sweep
+
+Two strings were reviewed on 10 Sept 2026 and deliberately left alone. Re-read them
+when auth ships, in case shipping it changes the answer:
+
+- `academy5/content-data.js` (~line 156) — *"This isn't a formal gate to enforce
+  rigidly — it's a judgment call."* About a Store Trainer's judgment on Academy 4
+  readiness, not a system gate. Still accurate after auth ships, unless Academy 4
+  becomes genuinely gated.
+- `academy2/content-data.js` (~line 326) — *"Passing both earns your Ritual &
+  Hospitality credential."* Not a progression gate, but it is an unfulfilled
+  promise of a different kind: the `signoffs` table exists with no interface, so no
+  credential is actually issued. Worth settling alongside auth.
+
+### 4. Related, same root cause
+
+`tracker/` and `analytics/` are open to anyone with the URL, and Supabase RLS is
+still `using (true)` (see the last paragraph of the previous section). Real auth is
+the fix for all three. Doing the copy restore without the RLS work would mean the
+site claims access control it still doesn't have where it matters most.

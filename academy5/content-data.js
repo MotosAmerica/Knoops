@@ -1,10 +1,10 @@
-// Academy 5 — Leadership & Store Trainer (gated to leadership track, not universal)
+// Academy 5 — Leadership & Store Trainer (aimed at the leadership track, not universal)
 // Full content transcribed from claude/knoops-academy5-module[1-7]-content.md
 // in the project docs.
 window.ACADEMY_DATA = {
   slug: "academy5",
   title: "Leadership & Store Trainer",
-  description: "For staff in or entering a leadership role. Not part of the universal sequence — unlocks on promotion.",
+  description: "For staff in or entering a leadership role. Not part of the universal sequence.",
   modules: [
     {
       id: 1, title: "From Knoopologist to Shift Lead", type: "reading",
