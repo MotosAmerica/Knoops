@@ -16,6 +16,10 @@ const supabase = createClient(
 
 const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY")!;
 
+// One place, so the model named in the ai_usage log can never drift from the
+// model actually called.
+const MODEL = "claude-sonnet-4-5";
+
 // Pull ALL rows for an academy (paginated — an unranged .select() silently
 // caps at 1000 rows via PostgREST once a table grows).
 async function getAcademyContent(academy: string) {
@@ -222,6 +226,30 @@ Respond with ONLY a valid JSON object, no markdown fences:
 {"score": <integer 1-5>, "feedback": "<your feedback>"}`;
 }
 
+// Token accounting.
+//
+// This runs server-side because the edge function is the only place that sees
+// what a call actually cost — a client could otherwise report whatever it liked,
+// and mostly wouldn't know. Best-effort by design: a logging failure must never
+// take down a grade or an answer, so nothing here is awaited on the hot path.
+function logUsage(kind: string, body: any, aiJson: any, ok = true) {
+  try {
+    const u = (aiJson && aiJson.usage) || {};
+    supabase.from("ai_usage").insert({
+      kind,
+      trainee_id: body?.trainee ?? null,
+      academy: body?.academy ?? null,
+      module_num: body?.module ?? null,
+      model: (aiJson && aiJson.model) || MODEL,
+      input_tokens: u.input_tokens ?? 0,
+      output_tokens: u.output_tokens ?? 0,
+      cache_read_tokens: u.cache_read_input_tokens ?? 0,
+      cache_write_tokens: u.cache_creation_input_tokens ?? 0,
+      ok,
+    }).then(() => {}, () => {});
+  } catch (_e) { /* never break a trainee's request over telemetry */ }
+}
+
 async function gradePractice(body: any, rows: any[]) {
   const { academy, moduleTitle, prompt, response, taught } = body;
   const systemPrompt = buildGradingPrompt(academy, moduleTitle, prompt, taught, rows);
@@ -234,7 +262,7 @@ async function gradePractice(body: any, rows: any[]) {
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-sonnet-4-5",
+      model: MODEL,
       max_tokens: 300,
       system: systemPrompt,
       messages: [{
@@ -252,8 +280,13 @@ async function gradePractice(body: any, rows: any[]) {
   try {
     const parsed = JSON.parse(cleaned);
     const score = Math.max(1, Math.min(5, parseInt(parsed.score, 10) || 4));
+    logUsage("grade", body, aiJson, true);
     return { score, feedback: String(parsed.feedback || "").slice(0, 800) };
   } catch (_e) {
+    // The tokens were still spent even though the answer was unusable, so it is
+    // logged with ok=false rather than not logged at all — otherwise the cost
+    // of a misbehaving prompt is invisible.
+    logUsage("grade", body, aiJson, false);
     // Never block a trainee on a parsing failure, and never punish them for
     // one — fall back to the normal score, not a low one.
     return {
@@ -309,7 +342,7 @@ serve(async (req) => {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: MODEL,
         max_tokens: 400,
         system: systemPrompt,
         messages: [{ role: "user", content: question }],
@@ -320,6 +353,8 @@ serve(async (req) => {
     // can come first.
     const textBlock = (aiJson.content || []).find((b: any) => b.type === "text");
     const answer = textBlock ? textBlock.text : "Sorry, I couldn't generate an answer just now.";
+
+    logUsage("ask", body, aiJson, !!textBlock);
 
     // Log for analytics (best-effort — don't fail the request if this errors)
     supabase.from("ask_queries").insert({

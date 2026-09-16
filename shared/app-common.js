@@ -421,6 +421,9 @@
           academy: DATA.slug,
           module: ctx.moduleId,
           moduleTitle: ctx.moduleTitle,
+          // Only used to attribute AI token spend to a person on the analytics
+          // page. The grader never sees it and it plays no part in the score.
+          trainee: ((window.KnoopsSignIn && window.KnoopsSignIn.getTrainee()) || {}).id || null,
           prompt: promptText(),
           response: text,
           // What this module actually taught. Without it the grader is marking
