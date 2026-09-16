@@ -21,14 +21,37 @@
   <p class="an-lede">Everything the platform records, in one place: who's training, what they're completing, how the AI practice is scoring, and what people think of the training itself.</p>
   <div class="tracker-note">
     Internal only, and deliberately not linked from anywhere in the platform.
-    Note this page is still reachable by anyone who knows the URL, and the repo is public —
-    treat the link as sensitive rather than assuming it's private.
+    It names individual trainees and shows what they wrote and said, and it is still reachable by
+    anyone who has the URL — treat the link as sensitive rather than assuming it's private.
   </div>
 
   <div id="an-error" class="tracker-empty" hidden></div>
 
   <!-- Headline -->
   <section id="an-kpis" class="an-section"></section>
+
+  <!-- Who's training -->
+  <section class="an-section">
+    <h2>Who's training</h2>
+    <p class="an-note">
+      Every trainee by name, and how far through their path they are. The strip is their whole
+      path end to end — one block per academy, sized by how many modules it holds — so a full
+      strip is a finished path. Everyone does Academies 1&ndash;4; leadership roles add Academy 5,
+      which is why their strip has an extra block and a bigger denominator.
+    </p>
+    <div class="an-controls">
+      <input type="text" id="an-people-search" placeholder="Search by name&hellip;">
+      <select id="an-people-store" aria-label="Filter by store"><option value="">All stores</option></select>
+      <select id="an-people-sort" aria-label="Sort trainees">
+        <option value="recent">Most recently active</option>
+        <option value="progress-desc">Furthest along</option>
+        <option value="progress-asc">Least far along</option>
+        <option value="name">Name (A&ndash;Z)</option>
+      </select>
+    </div>
+    <div id="an-people-key" class="an-key"></div>
+    <div id="an-people" class="an-chart"></div>
+  </section>
 
   <!-- Activity over time -->
   <section class="an-section">

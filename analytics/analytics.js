@@ -227,6 +227,7 @@
     }
 
     renderKpis(trainees, progress, practice, ratings, asks);
+    renderPeople(trainees, progress, quizzes, practice);
     renderActivity(progress, quizzes, practice, ratings);
     renderAcademyTable(trainees, progress, quizzes, practice, ratings);
     renderFunnel(progress);
@@ -290,6 +291,230 @@
       ratingVals.length ? `across ${(ratings || []).length} rating${(ratings || []).length === 1 ? "" : "s"}` : "no ratings yet"));
     grid.appendChild(statTile((asks || []).length, "Founder questions asked", "via the AI widget"));
     host.appendChild(grid);
+  }
+
+  // ---------------------------------------------------------------------
+  // Who's training — the one place on this page that names individuals.
+  //
+  // The strip is a meter for a whole path, not five separate charts: one block
+  // per academy in that person's path, each block's WIDTH proportional to how
+  // many modules the academy holds, each block filled by how many they've done.
+  // So the ink across the strip is literally their overall completion, and a
+  // full strip is a finished path. Identity is positional (see the key above
+  // the table) rather than five colours — five hues here would fail CVD
+  // separation and would imply the academies are unrelated categories when
+  // they're actually a sequence.
+  const PEOPLE_PAGE = 40;
+
+  function pathFor(role) {
+    return LEADERSHIP_ROLES.indexOf(role) !== -1 ? ACADEMY_ORDER : CORE_ACADEMIES;
+  }
+
+  function buildPeopleRows(trainees, progress, quizzes, practice) {
+    const progressBy = {};
+    progress.forEach((p) => {
+      (progressBy[p.trainee_id] = progressBy[p.trainee_id] || []).push(p);
+    });
+    const practiceBy = {};
+    (practice || []).forEach((p) => {
+      (practiceBy[p.trainee_id] = practiceBy[p.trainee_id] || []).push(p);
+    });
+    const lastActive = {};
+    progress.concat(quizzes || [], practice || []).forEach((r) => {
+      const ts = r.completed_at || r.created_at;
+      if (!ts || !r.trainee_id) return;
+      if (!lastActive[r.trainee_id] || ts > lastActive[r.trainee_id]) {
+        lastActive[r.trainee_id] = ts;
+      }
+    });
+
+    return trainees.map((t) => {
+      // Count each module once — a module re-opened and re-completed is still
+      // one module done, and the raw table has a row per completion.
+      const seen = {};
+      const doneByAcademy = {};
+      (progressBy[t.id] || []).forEach((d) => {
+        const k = d.academy + "|" + d.module_num;
+        if (seen[k]) return;
+        seen[k] = 1;
+        doneByAcademy[d.academy] = (doneByAcademy[d.academy] || 0) + 1;
+      });
+
+      const path = pathFor(t.role);
+      let total = 0, completed = 0;
+      const segments = path.map((slug) => {
+        const conf = ACADEMY_CONFIG[slug];
+        const done = Math.min(doneByAcademy[slug] || 0, conf.modules);
+        total += conf.modules;
+        completed += done;
+        return { slug, label: conf.label, modules: conf.modules, done };
+      });
+
+      // Modules finished in an academy that isn't part of this person's path.
+      // Nothing stops a Knoopologist opening Academy 5, so this can be real.
+      let offPath = 0;
+      Object.keys(doneByAcademy).forEach((slug) => {
+        if (path.indexOf(slug) === -1) offPath += doneByAcademy[slug];
+      });
+
+      const myPractice = practiceBy[t.id] || [];
+      const graded = myPractice.filter((p) => typeof p.score === "number");
+      const nextUp = segments.filter((s) => s.done < s.modules)[0] || null;
+
+      return {
+        id: t.id,
+        name: t.name || "(no name)",
+        store: t.store_location || "—",
+        role: roleLabel(t.role),
+        segments,
+        offPath,
+        completed,
+        total,
+        pct: total ? Math.round(completed / total * 100) : 0,
+        position: !completed ? "Not started"
+          : !nextUp ? "Path complete"
+          : `On ${nextUp.label} (${nextUp.done}/${nextUp.modules})`,
+        practiceCount: myPractice.length,
+        voiceCount: myPractice.filter((p) => p.input_mode === "voice").length,
+        avgPractice: graded.length ? mean(graded.map((p) => p.score)) : null,
+        lastActive: lastActive[t.id] || t.last_seen_at || t.created_at || null,
+      };
+    });
+  }
+
+  function pathStrip(host, row) {
+    const strip = el("div", "an-strip");
+    strip.setAttribute("role", "img");
+    strip.setAttribute("aria-label",
+      `${row.completed} of ${row.total} modules complete`);
+    row.segments.forEach((s, i) => {
+      const seg = el("div", "an-strip-seg");
+      seg.style.flex = `${s.modules} 1 0`;
+      const fill = el("div", "an-strip-fill");
+      fill.style.width = (s.done / s.modules) * 100 + "%";
+      seg.appendChild(fill);
+      wireTip(host, seg,
+        `<strong>${i + 1}. ${esc(s.label)}</strong><br>${s.done} of ${s.modules} modules`);
+      strip.appendChild(seg);
+    });
+    return strip;
+  }
+
+  function renderPeopleKey(rows) {
+    const host = document.getElementById("an-people-key");
+    if (!host) return;
+    host.innerHTML = "";
+    const anyLeadership = rows.some((r) => r.segments.length === ACADEMY_ORDER.length);
+    const shown = anyLeadership ? ACADEMY_ORDER : CORE_ACADEMIES;
+    shown.forEach((slug, i) => {
+      const item = el("div", "an-key-item");
+      item.appendChild(el("span", "an-key-num", String(i + 1)));
+      item.appendChild(el("span", null, esc(ACADEMY_CONFIG[slug].label)));
+      host.appendChild(item);
+    });
+  }
+
+  function renderPeople(trainees, progress, quizzes, practice) {
+    const host = document.getElementById("an-people");
+    if (!host) return;
+    const rows = buildPeopleRows(trainees, progress, quizzes, practice);
+    renderPeopleKey(rows);
+
+    const search = document.getElementById("an-people-search");
+    const storeSel = document.getElementById("an-people-store");
+    const sortSel = document.getElementById("an-people-sort");
+
+    if (storeSel && storeSel.options.length <= 1) {
+      Array.from(new Set(rows.map((r) => r.store))).sort().forEach((s) => {
+        const o = document.createElement("option");
+        o.value = s; o.textContent = s;
+        storeSel.appendChild(o);
+      });
+    }
+
+    let expanded = false;
+    function draw() {
+      const q = (search && search.value || "").trim().toLowerCase();
+      const store = storeSel ? storeSel.value : "";
+      const sort = sortSel ? sortSel.value : "recent";
+
+      let list = rows.filter((r) => {
+        if (q && r.name.toLowerCase().indexOf(q) === -1) return false;
+        if (store && r.store !== store) return false;
+        return true;
+      });
+      list = list.slice().sort((a, b) => {
+        if (sort === "name") return a.name.localeCompare(b.name);
+        if (sort === "progress-desc") return b.pct - a.pct || a.name.localeCompare(b.name);
+        if (sort === "progress-asc") return a.pct - b.pct || a.name.localeCompare(b.name);
+        return String(b.lastActive || "").localeCompare(String(a.lastActive || ""));
+      });
+
+      host.innerHTML = "";
+      if (!list.length) {
+        host.appendChild(el("div", "tracker-empty",
+          rows.length ? "Nobody matches these filters."
+                      : "Nobody has signed in yet — this fills in on the first sign-in."));
+        return;
+      }
+
+      const table = document.createElement("table");
+      table.className = "tracker-table an-table an-people-table";
+      table.innerHTML = `<thead><tr>
+        <th>Trainee</th><th>Store</th><th>Progress</th><th>Practice</th><th>Last active</th>
+      </tr></thead>`;
+      const tbody = document.createElement("tbody");
+
+      const visible = expanded ? list : list.slice(0, PEOPLE_PAGE);
+      visible.forEach((r) => {
+        const tr = document.createElement("tr");
+
+        const nameTd = document.createElement("td");
+        nameTd.innerHTML =
+          `<div class="an-people-name">${esc(r.name)}</div><div class="an-sub">${esc(r.role)}</div>`;
+
+        const storeTd = document.createElement("td");
+        storeTd.textContent = r.store;
+
+        const progTd = document.createElement("td");
+        progTd.className = "an-people-cell";
+        progTd.appendChild(pathStrip(host, r));
+        const sub = `${r.completed} / ${r.total} modules · ${r.pct}% · ${esc(r.position)}` +
+          (r.offPath ? ` · +${r.offPath} outside their path` : "");
+        progTd.appendChild(el("div", "an-sub", sub));
+
+        const pracTd = document.createElement("td");
+        pracTd.innerHTML = r.practiceCount
+          ? `<strong>${r.avgPractice === null ? "—" : fmt(r.avgPractice)}</strong>${r.avgPractice === null ? "" : " / 5"}
+             <div class="an-sub">${r.practiceCount} rep${r.practiceCount === 1 ? "" : "s"}${r.voiceCount ? ` · ${r.voiceCount} spoken` : ""}</div>`
+          : `<span style="color:#aaa">—</span>`;
+
+        const lastTd = document.createElement("td");
+        lastTd.textContent = r.lastActive
+          ? new Date(r.lastActive).toLocaleDateString() : "—";
+
+        [nameTd, storeTd, progTd, pracTd, lastTd].forEach((td) => tr.appendChild(td));
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      const scroll = el("div", "an-table-scroll");
+      scroll.appendChild(table);
+      host.appendChild(scroll);
+
+      if (!expanded && list.length > PEOPLE_PAGE) {
+        const btn = el("button", "an-more",
+          `Show all ${list.length} trainees`);
+        btn.type = "button";
+        btn.addEventListener("click", () => { expanded = true; draw(); });
+        host.appendChild(btn);
+      }
+    }
+
+    if (search) search.addEventListener("input", () => { expanded = false; draw(); });
+    if (storeSel) storeSel.addEventListener("change", () => { expanded = false; draw(); });
+    if (sortSel) sortSel.addEventListener("change", draw);
+    draw();
   }
 
   // ---------------------------------------------------------------------

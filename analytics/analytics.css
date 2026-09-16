@@ -72,6 +72,53 @@
 .an-table { min-width: 720px; }
 .an-table td { vertical-align: top; }
 
+/* ---- who's training: positional key + path strip ---- */
+/* Identity in the strip is positional, not colour: every block is the same
+   single hue, and this key says which position is which academy. */
+.an-key {
+  display: flex; flex-wrap: wrap; gap: 6px 14px;
+  margin: 0 0 14px; padding: 0;
+}
+.an-key-item {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.78rem; color: #777;
+}
+.an-key-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 4px;
+  background: rgba(154, 83, 46, 0.14); color: var(--knoops-brown);
+  font-size: 0.7rem; font-weight: 700; font-variant-numeric: tabular-nums;
+}
+
+.an-people-cell { min-width: 230px; }
+/* 2px surface gap does the separating between blocks — no strokes. */
+.an-strip { display: flex; gap: 2px; width: 100%; }
+.an-strip-seg {
+  height: 10px; border-radius: 3px;
+  background: rgba(154, 83, 46, 0.14); /* lighter step of the same hue */
+  overflow: hidden;
+}
+.an-strip-seg--muted { background: rgba(18, 18, 18, 0.06); }
+.an-strip-fill { height: 100%; background: var(--knoops-brown); border-radius: 3px; }
+.an-people-name { font-weight: 600; }
+.an-people-table th { cursor: default; }
+.an-people-table td { font-variant-numeric: tabular-nums; }
+.an-people-table td:first-child { font-variant-numeric: normal; }
+
+.an-controls input[type="text"] {
+  padding: 8px 12px; min-height: 40px; border-radius: var(--radius-sm);
+  border: 1px solid rgba(18,18,18,0.15); font-family: var(--knoops-font);
+  font-size: 0.9rem; background: var(--knoops-white); min-width: 190px;
+}
+.an-more {
+  margin-top: 12px; padding: 9px 16px; min-height: 40px;
+  background: var(--knoops-white); color: var(--knoops-brown);
+  border: 1px solid rgba(154, 83, 46, 0.35); border-radius: var(--radius-sm);
+  font-family: var(--knoops-font); font-size: 0.85rem; font-weight: 600;
+  cursor: pointer;
+}
+.an-more:hover { background: rgba(154, 83, 46, 0.06); }
+
 /* ---- prompt / question lists ---- */
 .an-prompt-list { display: grid; gap: 10px; }
 .an-prompt {
@@ -95,4 +142,7 @@
   .an-hbar-row { grid-template-columns: minmax(90px, 42%) 1fr auto; gap: 8px; }
   .an-hbar-label { font-size: 0.8rem; }
   .an-svg { height: 130px; }
+  .an-controls { flex-wrap: wrap; }
+  .an-controls input[type="text"] { flex: 1 1 100%; min-width: 0; }
+  .an-controls select { flex: 1 1 45%; min-width: 0; }
 }
