@@ -104,6 +104,39 @@ Every `Do — practice` prompt across the reading modules is a real interactive 
 - **Manager tracker** (`tracker/index.html`) is a read-only dashboard: total signed in, average completion, who's fully certified, a store/academy filter, and a per-person progress bar with last-active date. It reads live from `trainees` + `module_progress` + `quiz_attempts` — nothing to configure. Like the rest of the platform, it has no password of its own; don't link it anywhere public.
 - **Progress sync**: every "Mark module complete" click (reading modules and quizzes) writes to `module_progress` (and `quiz_attempts` for quizzes, with the score) whenever someone's signed in and Supabase is connected — that's what feeds the tracker. If Supabase isn't reachable, local progress still works, it just won't show up for a manager until it's back.
 
+## Visit tracking — device, active time, timing (added Sept 16, 2026)
+
+`trainee_sessions` (migration `0005`) plus a tracker at the bottom of
+`shared/signin.js`. It exists to answer three questions the platform previously
+had no data for: how long people train for, whether they do it on a phone, and
+when in the week they do it.
+
+Three design decisions worth not undoing by accident:
+
+- **A row is a VISIT, not a page load.** The session id lives in
+  `sessionStorage`, so walking from module to module continues one session.
+  Without this, "sessions per person" would just count clicks.
+- **`active_ms` is time SPENT, not time ELAPSED.** The clock advances only while
+  the tab is visible *and* there's been real input in the last three minutes.
+  Wall-clock would score a tab left open over a lunch break as an hour of
+  training, and every engagement figure downstream would be inflated. There's a
+  deliberate three-minute grace window, so reading a long screen without
+  touching anything still counts.
+- **Nothing identifying is stored.** No user-agent string, no IP, no
+  fingerprint — a coarse device class (`phone`/`tablet`/`desktop`) and the
+  window width. Device class comes from pointer type first and width second, so
+  a narrowed desktop window isn't misread as a phone.
+
+The tracker rides in `signin.js` rather than its own file on purpose: that
+script is already loaded by exactly the eleven trainee-facing pages and by
+neither `tracker/` nor `analytics/`, so staff reading the dashboard never
+pollute trainee data, and no HTML or `.cpanel.yml` change was needed.
+
+**This data starts the day it shipped.** The analytics page says so in the
+section itself rather than letting a thin chart read as "nobody trains". The
+*when-they-train* heatmap is the exception — it's built from every recorded
+action, so it covers the whole history.
+
 ## Where this is hosted (updated Sept 4, 2026)
 
 **Live at https://knoops.oneteamos.com** — served from Namecheap shared hosting

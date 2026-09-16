@@ -153,10 +153,141 @@
     slot.appendChild(signout);
   }
 
+  // ---------- Visit sessions, device class, active time ----------
+  //
+  // A row in `trainee_sessions` is one VISIT, not one page load: the id lives
+  // in sessionStorage, so walking from a module to the next module continues
+  // the same session. "Sessions per person" therefore means visits.
+  //
+  // active_ms is time SPENT, not time ELAPSED. Wall-clock from load to close
+  // would count a tab left open over a lunch break as an hour of training, and
+  // every engagement number downstream would be a lie. The clock only advances
+  // while the tab is visible AND there has been real input recently; a gap past
+  // IDLE_CUTOFF_MS ends the visit, so this morning's session never gets glued
+  // to this afternoon's.
+  //
+  // Nothing identifying is collected: no user-agent string, no IP, no
+  // fingerprint. A coarse device class and the window width are enough to
+  // answer "is this being done on a phone?", which is the only question asked
+  // of it. This never runs on the tracker or analytics pages — they don't load
+  // this script — so staff reading the dashboard don't pollute trainee data.
+  const SESSION_KEY = "knoops_session";
+  const TICK_MS = 5000;           // how often the clock is evaluated
+  const BEAT_MS = 30000;          // how much new time before it's written
+  const IDLE_CUTOFF_MS = 180000;  // 3 min without input = not training any more
+
+  function deviceClass() {
+    const w = window.innerWidth || (window.screen && window.screen.width) || 0;
+    // Width alone misreads a narrowed desktop window as a phone. Pointer type
+    // is the honest signal; width then separates phone from tablet.
+    const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+    const touch = (navigator.maxTouchPoints || 0) > 1;
+    if (coarse || touch) return w <= 640 ? "phone" : "tablet";
+    return "desktop";
+  }
+
+  function entryPath() {
+    const parts = location.pathname.split("/").filter(Boolean);
+    return parts.slice(-2).join("/") || "index.html";
+  }
+
+  function trackSession() {
+    const c = cfg();
+    const t = getTrainee();
+    // No backend, no trainee, or an offline-only local id — nothing to write to.
+    if (!c.SUPABASE_URL || !t || !t.id || String(t.id).indexOf("local-") === 0) return;
+
+    const headers = {
+      "Content-Type": "application/json",
+      "apikey": c.SUPABASE_ANON_KEY,
+      "Authorization": `Bearer ${c.SUPABASE_ANON_KEY}`,
+    };
+
+    let saved = null;
+    try { saved = JSON.parse(sessionStorage.getItem(SESSION_KEY) || "null"); } catch (e) {}
+    const now = Date.now();
+    if (!saved || !saved.id || (now - (saved.lastBeat || 0)) > IDLE_CUTOFF_MS) saved = null;
+
+    let sessionId = saved ? saved.id : null;
+    let activeMs = saved ? (saved.activeMs || 0) : 0;
+    let writtenMs = activeMs;
+    let lastTick = now;
+    let lastInput = now;
+    let creating = null;
+
+    function remember() {
+      try {
+        sessionStorage.setItem(SESSION_KEY,
+          JSON.stringify({ id: sessionId, activeMs, lastBeat: Date.now() }));
+      } catch (e) {}
+    }
+
+    ["pointerdown", "keydown", "scroll", "wheel", "touchstart"].forEach((ev) => {
+      window.addEventListener(ev, () => { lastInput = Date.now(); }, { passive: true });
+    });
+
+    function ensureRow() {
+      if (sessionId) return Promise.resolve(sessionId);
+      if (creating) return creating;
+      creating = fetch(`${c.SUPABASE_URL}/rest/v1/trainee_sessions`, {
+        method: "POST",
+        headers: Object.assign({ "Prefer": "return=representation" }, headers),
+        body: JSON.stringify({
+          trainee_id: t.id,
+          device: deviceClass(),
+          screen_w: window.innerWidth || null,
+          entry_path: entryPath(),
+        }),
+      })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((rows) => {
+          const row = Array.isArray(rows) ? rows[0] : rows;
+          sessionId = row && row.id ? row.id : null;
+          remember();
+          return sessionId;
+        })
+        .catch(() => null);
+      return creating;
+    }
+
+    function persist(isFinal) {
+      return ensureRow().then((id) => {
+        if (!id) return;
+        const body = JSON.stringify({
+          active_ms: Math.round(activeMs),
+          last_beat_at: new Date().toISOString(),
+        });
+        // keepalive lets the last write survive the page going away; sendBeacon
+        // can't be used here because it cannot set the apikey header.
+        return fetch(`${c.SUPABASE_URL}/rest/v1/trainee_sessions?id=eq.${id}`, {
+          method: "PATCH", headers, body, keepalive: !!isFinal,
+        }).then(() => { writtenMs = activeMs; }).catch(() => {});
+      });
+    }
+
+    setInterval(() => {
+      const t2 = Date.now();
+      if (document.visibilityState === "visible" && (t2 - lastInput) < IDLE_CUTOFF_MS) {
+        activeMs += t2 - lastTick;
+      }
+      lastTick = t2;
+      remember();
+      if (activeMs - writtenMs >= BEAT_MS) persist(false);
+    }, TICK_MS);
+
+    // visibilitychange is the reliable one on mobile; pagehide covers the rest.
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "hidden") persist(true);
+    });
+    window.addEventListener("pagehide", () => persist(true));
+
+    ensureRow();
+  }
+
   function init() {
     renderTopbarUser();
-    if (getTrainee()) return;
-    buildOverlay(renderTopbarUser);
+    if (getTrainee()) { trackSession(); return; }
+    buildOverlay(() => { renderTopbarUser(); trackSession(); });
   }
 
   window.KnoopsSignIn = { init, getTrainee, isManager, clearTrainee, ROLES, MANAGER_ROLES };

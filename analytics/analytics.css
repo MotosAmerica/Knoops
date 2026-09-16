@@ -119,6 +119,37 @@
 }
 .an-more:hover { background: rgba(154, 83, 46, 0.06); }
 
+/* ---- status pill ---- */
+.an-pill {
+  display: inline-block; margin-top: 5px;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em;
+  text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
+}
+.an-pill--idle { background: rgba(154, 83, 46, 0.12); color: #7A4224; }
+
+/* ---- when-people-train heatmap ---- */
+/* Sequential single hue: the value is magnitude, so lightness carries it.
+   The peak is also named in text under the chart — never colour-only. */
+.an-heat { overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; }
+.an-heat-grid {
+  display: grid;
+  grid-template-columns: 34px repeat(12, minmax(22px, 1fr));
+  gap: 2px; /* surface gap, same mechanism as every other chart here */
+  min-width: 360px;
+}
+.an-heat-daylabel {
+  font-size: 0.72rem; color: #999; display: flex; align-items: center;
+  height: 22px; white-space: nowrap;
+}
+.an-heat-cell {
+  height: 22px; border-radius: 3px;
+  background: rgba(18, 18, 18, 0.045);
+}
+.an-heat-hour { font-size: 0.66rem; color: #aaa; text-align: left; padding-top: 3px; }
+.an-heat-legend { display: flex; align-items: center; gap: 4px; margin-top: 10px; }
+.an-heat-legend-text { font-size: 0.72rem; color: #999; }
+.an-heat-swatch { width: 18px; height: 10px; border-radius: 2px; }
+
 /* ---- prompt / question lists ---- */
 .an-prompt-list { display: grid; gap: 10px; }
 .an-prompt {

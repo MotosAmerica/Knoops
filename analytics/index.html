@@ -27,11 +27,22 @@
 
   <div id="an-error" class="tracker-empty" hidden></div>
 
-  <!-- Headline -->
+  <!-- Headline — always visible, never collapsible -->
   <section id="an-kpis" class="an-section"></section>
 
+  <div class="an-toggle-all">
+    <button type="button" id="an-expand-all">Expand all</button>
+    <span class="an-toggle-sep">·</span>
+    <button type="button" id="an-collapse-all">Collapse all</button>
+    <span class="an-toggle-sep">·</span>
+    <button type="button" id="an-print-all">Print full report</button>
+  </div>
+
+  <!-- Only visible on paper: says what this printout is and when it was taken. -->
+  <div id="an-print-stamp" class="an-print-stamp"></div>
+
   <!-- Who's training -->
-  <section class="an-section">
+  <section class="an-section" data-key="people">
     <h2>Who's training</h2>
     <p class="an-note">
       Every trainee by name, and how far through their path they are. The strip is their whole
@@ -54,21 +65,51 @@
   </section>
 
   <!-- Activity over time -->
-  <section class="an-section">
+  <section class="an-section" data-key="activity">
     <h2>Activity over time</h2>
     <p class="an-note">Every recorded event — module completions, quizzes, practice reps and ratings — by week.</p>
     <div id="an-activity" class="an-chart"></div>
   </section>
 
+  <!-- How people train -->
+  <section class="an-section" data-key="habits">
+    <h2>How people train</h2>
+    <p class="an-note" id="an-habits-scope">
+      Device and visit length, recorded per visit. Durations are <em>active</em> time — the clock only
+      runs while someone is on the page and using it, so a tab left open over a break isn't counted as
+      training.
+    </p>
+    <div id="an-habits-kpis" class="an-subkpis"></div>
+    <div class="an-two-col">
+      <div>
+        <h3>Phone, tablet or desktop</h3>
+        <p class="an-note">Whether the phone-first, voice-first design matches how it actually gets used.</p>
+        <div id="an-device" class="an-chart"></div>
+      </div>
+      <div>
+        <h3>How long a visit lasts</h3>
+        <p class="an-note">A visit spans several modules when they're done in one sitting, so this is a sitting, not a page view.</p>
+        <div id="an-session-len" class="an-chart"></div>
+      </div>
+    </div>
+    <h3>When people train</h3>
+    <p class="an-note">
+      Every recorded action by day and time of day — before shift, after shift, or on the clock.
+      Built from all activity, so it covers the whole history rather than only since visit tracking started.
+    </p>
+    <div id="an-when" class="an-chart"></div>
+    <p class="an-sub" id="an-when-peak"></p>
+  </section>
+
   <!-- Academy comparison -->
-  <section class="an-section">
+  <section class="an-section" data-key="academies">
     <h2>By academy</h2>
     <p class="an-note">Where people are getting to, and how each academy is landing.</p>
     <div id="an-academy-table"></div>
   </section>
 
   <!-- Where people stop -->
-  <section class="an-section">
+  <section class="an-section" data-key="funnel">
     <h2>Where people stop</h2>
     <p class="an-note">Completions per module. A cliff between two bars is where an academy is losing people.</p>
     <div class="an-controls">
@@ -79,7 +120,7 @@
   </section>
 
   <!-- Practice -->
-  <section class="an-section">
+  <section class="an-section" data-key="practice">
     <h2>AI practice</h2>
     <div id="an-practice-kpis" class="an-subkpis"></div>
     <div class="an-two-col">
@@ -99,8 +140,36 @@
     <div id="an-hard-prompts"></div>
   </section>
 
+  <!-- AI token use -->
+  <section class="an-section" data-key="tokens">
+    <h2>AI token use</h2>
+    <p class="an-note">
+      Every call to the AI and what it consumed — grading a practice answer, and answering an
+      "Ask the Founder" question. Logged by the edge function rather than the browser, so these
+      are actual reported counts. Billing is metered in the Anthropic console; what this answers
+      is where the tokens went.
+    </p>
+    <div id="an-tokens-kpis" class="an-subkpis"></div>
+    <div class="an-two-col">
+      <div>
+        <h3>Where the tokens go</h3>
+        <p class="an-note">Which feature is consuming them, and how it splits between what we send and what comes back.</p>
+        <div id="an-token-split" class="an-chart"></div>
+      </div>
+      <div>
+        <h3>Tokens per week</h3>
+        <p class="an-note">Usage follows activity — a jump here without a jump in practice reps is worth a look.</p>
+        <div id="an-token-trend" class="an-chart"></div>
+      </div>
+    </div>
+    <h3>Tokens per trainee</h3>
+    <p class="an-note">What one person's training has consumed so far. This is the number that scales with headcount.</p>
+    <div id="an-token-people" class="an-chart"></div>
+    <p class="an-sub" id="an-token-note"></p>
+  </section>
+
   <!-- Ratings -->
-  <section class="an-section">
+  <section class="an-section" data-key="ratings">
     <h2>How trainees rate the training</h2>
     <div id="an-rating-kpis" class="an-subkpis"></div>
     <h3>Star distribution</h3>
@@ -111,14 +180,14 @@
   </section>
 
   <!-- Ask the Founder -->
-  <section class="an-section">
+  <section class="an-section" data-key="asks">
     <h2>Ask the Founder</h2>
     <p class="an-note">What people actually want to know. Repeated questions are a content gap worth filling in a module.</p>
     <div id="an-questions"></div>
   </section>
 
   <!-- Stores &amp; roles -->
-  <section class="an-section">
+  <section class="an-section" data-key="stores">
     <h2>Stores &amp; roles</h2>
     <div class="an-two-col">
       <div>

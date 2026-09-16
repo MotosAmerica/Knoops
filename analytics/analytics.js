@@ -192,6 +192,57 @@
     return box;
   }
 
+  // "2h 14m" / "18m" / "40s" — never "0.31 hours", which nobody reads.
+  function fmtDur(ms) {
+    if (!ms || ms < 1000) return "—";
+    const mins = Math.round(ms / 60000);
+    if (mins < 1) return Math.round(ms / 1000) + "s";
+    if (mins < 60) return mins + "m";
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m ? `${h}h ${m}m` : `${h}h`;
+  }
+  function median(nums) {
+    if (!nums.length) return null;
+    const s = nums.slice().sort((a, b) => a - b);
+    const mid = Math.floor(s.length / 2);
+    return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+  }
+  function dayKey(ts) { return new Date(ts).toISOString().slice(0, 10); }
+  function daysAgo(ts) {
+    if (!ts) return null;
+    return Math.floor((Date.now() - new Date(ts).getTime()) / 864e5);
+  }
+  function agoLabel(ts) {
+    const d = daysAgo(ts);
+    if (d === null) return "—";
+    if (d <= 0) return "today";
+    if (d === 1) return "yesterday";
+    if (d < 30) return d + " days ago";
+    if (d < 60) return "a month ago";
+    return Math.round(d / 30) + " months ago";
+  }
+  // Consecutive days with activity, counting back from today. A streak that
+  // ended yesterday still counts — asking someone to have trained TODAY to
+  // have a streak makes the number useless before lunch.
+  function streakFrom(dayKeys) {
+    if (!dayKeys.length) return 0;
+    const set = {};
+    dayKeys.forEach((k) => { set[k] = 1; });
+    const today = new Date();
+    let cursor = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    if (!set[cursor.toISOString().slice(0, 10)]) {
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+      if (!set[cursor.toISOString().slice(0, 10)]) return 0;
+    }
+    let n = 0;
+    while (set[cursor.toISOString().slice(0, 10)]) {
+      n++;
+      cursor.setUTCDate(cursor.getUTCDate() - 1);
+    }
+    return n;
+  }
+
   function isoWeekStart(d) {
     const dt = new Date(d);
     const day = (dt.getUTCDay() + 6) % 7; // Monday = 0
@@ -201,7 +252,173 @@
   }
 
   // ---------------------------------------------------------------------
+  // Collapsible sections.
+  //
+  // The page outgrew a single scroll. Each section folds down to its heading —
+  // but a heading alone ("AI practice") would force you to open everything to
+  // find anything, so every collapsed header carries its own headline number.
+  // Collapsed, the page reads as a summary; expanded, it's the same detail as
+  // before. Open/closed is remembered per browser, so the default only matters
+  // on a first visit.
+  const COLLAPSE_KEY = "knoops_an_open";
+  const DEFAULT_OPEN = ["people"];
+  const openState = {};
+
+  function readOpenState() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(COLLAPSE_KEY) || "null");
+      return raw && typeof raw === "object" ? raw : null;
+    } catch (e) { return null; }
+  }
+  function saveOpenState() {
+    try { localStorage.setItem(COLLAPSE_KEY, JSON.stringify(openState)); } catch (e) {}
+  }
+
+  // Render functions call this; it's a no-op if the section isn't on the page.
+  function setSummary(key, text) {
+    const n = document.querySelector(`[data-summary="${key}"]`);
+    if (n) n.textContent = text || "";
+  }
+
+  const toggles = {};
+  function setOpen(key, open, persist) {
+    const t = toggles[key];
+    if (!t) return;
+    t.btn.setAttribute("aria-expanded", open ? "true" : "false");
+    t.body.hidden = !open;
+    t.section.classList.toggle("is-open", open);
+    openState[key] = open;
+    if (persist !== false) saveOpenState();
+  }
+
+  // Print one section as a standalone report.
+  //
+  // A section can be printed while collapsed, and the people table can be
+  // capped at 40 rows on screen — a printed report that silently omits rows
+  // would be worse than no report, so both are forced open for the print and
+  // put back afterwards.
+  function printSection(key, label) {
+    const t = toggles[key];
+    if (!t) return;
+    const wasOpen = openState[key] === true;
+
+    const showAll = t.section.querySelector(".an-more");
+    if (showAll) showAll.click();
+
+    document.body.classList.add("an-printing");
+    t.section.classList.add("an-print-target");
+    if (!wasOpen) setOpen(key, true, false);
+
+    const stamp = document.getElementById("an-print-stamp");
+    if (stamp) {
+      stamp.textContent = `Knoops Academy · ${label || key} · ${new Date().toLocaleString()}`;
+    }
+
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      document.body.classList.remove("an-printing");
+      t.section.classList.remove("an-print-target");
+      if (!wasOpen) setOpen(key, false, false);
+      window.removeEventListener("afterprint", cleanup);
+    };
+    window.addEventListener("afterprint", cleanup);
+
+    // Let the reflow land before the dialog snapshots the page, and keep a
+    // timer as a backstop for browsers that never fire afterprint.
+    setTimeout(() => {
+      try { window.print(); } catch (e) {}
+      setTimeout(cleanup, 1500);
+    }, 60);
+  }
+
+  function setupCollapsibles() {
+    const saved = readOpenState();
+    const sections = Array.from(document.querySelectorAll("section.an-section[data-key]"));
+    const hash = (location.hash || "").replace(/^#/, "");
+
+    sections.forEach((sec) => {
+      const key = sec.getAttribute("data-key");
+      const h2 = sec.querySelector("h2");
+      if (!key || !h2) return;
+
+      // Everything after the heading becomes the collapsible body.
+      const body = el("div", "an-body");
+      body.id = `an-body-${key}`;
+      let n = h2.nextSibling;
+      while (n) { const next = n.nextSibling; body.appendChild(n); n = next; }
+      sec.appendChild(body);
+
+      // Button inside the heading keeps both the heading semantics and a real
+      // keyboard-operable control.
+      const label = h2.innerHTML;
+      h2.innerHTML = "";
+      h2.classList.add("an-h2");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "an-head";
+      btn.setAttribute("aria-controls", body.id);
+      btn.innerHTML =
+        `<span class="an-chev" aria-hidden="true"></span>` +
+        `<span class="an-head-title">${label}</span>` +
+        `<span class="an-head-summary" data-summary="${key}"></span>`;
+      h2.appendChild(btn);
+
+      // The print control is a SIBLING of the toggle, never inside it — a
+      // button nested inside a button is invalid HTML and the inner click gets
+      // swallowed by the outer one.
+      const plain = label.replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").trim();
+      const printBtn = document.createElement("button");
+      printBtn.type = "button";
+      printBtn.className = "an-print";
+      printBtn.textContent = "Print";
+      printBtn.title = `Print this section`;
+      printBtn.setAttribute("aria-label", `Print report: ${plain}`);
+      h2.appendChild(printBtn);
+      printBtn.addEventListener("click", (ev) => {
+        ev.stopPropagation();
+        printSection(key, plain);
+      });
+
+      toggles[key] = { btn, body, section: sec, printBtn, label: plain };
+      btn.addEventListener("click", () => {
+        setOpen(key, btn.getAttribute("aria-expanded") !== "true");
+      });
+
+      const open = hash === key ? true
+        : saved ? !!saved[key]
+        : DEFAULT_OPEN.indexOf(key) !== -1;
+      setOpen(key, open, false);
+    });
+
+    const all = (open) => () => {
+      Object.keys(toggles).forEach((k) => setOpen(k, open, false));
+      saveOpenState();
+    };
+    const ex = document.getElementById("an-expand-all");
+    const col = document.getElementById("an-collapse-all");
+    const printAll = document.getElementById("an-print-all");
+    if (ex) ex.addEventListener("click", all(true));
+    if (col) col.addEventListener("click", all(false));
+    if (printAll) {
+      printAll.addEventListener("click", () => {
+        // Whole-page report: everything open, nothing singled out.
+        Object.keys(toggles).forEach((k) => {
+          const more = toggles[k].section.querySelector(".an-more");
+          if (more) more.click();
+          setOpen(k, true, false);
+        });
+        const stamp = document.getElementById("an-print-stamp");
+        if (stamp) stamp.textContent = `Knoops Academy · Full analytics report · ${new Date().toLocaleString()}`;
+        setTimeout(() => { try { window.print(); } catch (e) {} }, 80);
+      });
+    }
+  }
+
+  // ---------------------------------------------------------------------
   async function init() {
+    setupCollapsibles();
     const c = cfg();
     const errBox = document.getElementById("an-error");
     if (!c.SUPABASE_URL) {
@@ -210,15 +427,17 @@
       return;
     }
 
-    let trainees, progress, quizzes, practice, ratings, asks;
+    let trainees, progress, quizzes, practice, ratings, asks, sessions, usage;
     try {
-      [trainees, progress, quizzes, practice, ratings, asks] = await Promise.all([
+      [trainees, progress, quizzes, practice, ratings, asks, sessions, usage] = await Promise.all([
         fetchTable("trainees", "id,name,store_location,role,created_at,last_seen_at,login_count"),
         fetchTable("module_progress", "trainee_id,academy,module_num,module_title,completed_at"),
         fetchTable("quiz_attempts", "trainee_id,academy,module_num,score,passed,created_at"),
         fetchOptional("practice_responses", "trainee_id,academy,module_num,prompt_key,prompt_text,score,input_mode,created_at"),
         fetchOptional("module_ratings", "trainee_id,academy,module_num,q_useful,q_confident,q_practice,comment,created_at"),
         fetchOptional("ask_queries", "academy,module_num,question,created_at"),
+        fetchOptional("trainee_sessions", "trainee_id,started_at,last_beat_at,active_ms,device,screen_w"),
+        fetchOptional("ai_usage", "kind,trainee_id,academy,module_num,model,input_tokens,output_tokens,cache_read_tokens,cache_write_tokens,ok,created_at"),
       ]);
     } catch (e) {
       errBox.hidden = false;
@@ -227,11 +446,14 @@
     }
 
     renderKpis(trainees, progress, practice, ratings, asks);
-    renderPeople(trainees, progress, quizzes, practice);
+    renderPeople(trainees, progress, quizzes, practice, sessions);
     renderActivity(progress, quizzes, practice, ratings);
+    renderHabits(sessions, trainees);
+    renderWhen(progress, quizzes, practice, ratings, sessions);
     renderAcademyTable(trainees, progress, quizzes, practice, ratings);
     renderFunnel(progress);
     renderPractice(practice);
+    renderTokens(usage, trainees);
     renderRatings(ratings);
     renderQuestions(asks);
     renderStoresAndRoles(trainees, progress);
@@ -310,7 +532,22 @@
     return LEADERSHIP_ROLES.indexOf(role) !== -1 ? ACADEMY_ORDER : CORE_ACADEMIES;
   }
 
-  function buildPeopleRows(trainees, progress, quizzes, practice) {
+  function buildPeopleRows(trainees, progress, quizzes, practice, sessions) {
+    const sessionsBy = {};
+    (sessions || []).forEach((s) => {
+      (sessionsBy[s.trainee_id] = sessionsBy[s.trainee_id] || []).push(s);
+    });
+    const daysBy = {};
+    progress.concat(quizzes || [], practice || []).forEach((r) => {
+      const ts = r.completed_at || r.created_at;
+      if (!ts || !r.trainee_id) return;
+      (daysBy[r.trainee_id] = daysBy[r.trainee_id] || {})[dayKey(ts)] = 1;
+    });
+    (sessions || []).forEach((s) => {
+      if (!s.started_at || !s.trainee_id) return;
+      (daysBy[s.trainee_id] = daysBy[s.trainee_id] || {})[dayKey(s.started_at)] = 1;
+    });
+
     const progressBy = {};
     progress.forEach((p) => {
       (progressBy[p.trainee_id] = progressBy[p.trainee_id] || []).push(p);
@@ -361,6 +598,19 @@
       const graded = myPractice.filter((p) => typeof p.score === "number");
       const nextUp = segments.filter((s) => s.done < s.modules)[0] || null;
 
+      const mySessions = sessionsBy[t.id] || [];
+      const activeMs = mySessions.reduce((s, x) => s + (Number(x.active_ms) || 0), 0);
+      const devices = {};
+      mySessions.forEach((x) => {
+        if (x.device) devices[x.device] = (devices[x.device] || 0) + 1;
+      });
+      const topDevice = Object.keys(devices).sort((a, b) => devices[b] - devices[a])[0] || null;
+      const deviceMix = topDevice && devices[topDevice] < mySessions.length ? "mostly " + topDevice : topDevice;
+
+      const dayKeys = Object.keys(daysBy[t.id] || {});
+      const lastTs = lastActive[t.id] || t.last_seen_at || t.created_at || null;
+      const since = daysAgo(lastTs);
+
       return {
         id: t.id,
         name: t.name || "(no name)",
@@ -377,7 +627,17 @@
         practiceCount: myPractice.length,
         voiceCount: myPractice.filter((p) => p.input_mode === "voice").length,
         avgPractice: graded.length ? mean(graded.map((p) => p.score)) : null,
-        lastActive: lastActive[t.id] || t.last_seen_at || t.created_at || null,
+        lastActive: lastTs,
+        // --- engagement ---
+        sessionCount: mySessions.length,
+        activeMs,
+        deviceMix,
+        daysActive: dayKeys.length,
+        streak: streakFrom(dayKeys),
+        daysSince: since,
+        // Started, not finished, and gone quiet for a fortnight. Not a
+        // judgement — it's the list a Store Trainer should actually work from.
+        stalled: completed > 0 && (!nextUp ? false : true) && since !== null && since >= 14,
       };
     });
   }
@@ -414,11 +674,18 @@
     });
   }
 
-  function renderPeople(trainees, progress, quizzes, practice) {
+  function renderPeople(trainees, progress, quizzes, practice, sessions) {
     const host = document.getElementById("an-people");
     if (!host) return;
-    const rows = buildPeopleRows(trainees, progress, quizzes, practice);
+    const rows = buildPeopleRows(trainees, progress, quizzes, practice, sessions);
     renderPeopleKey(rows);
+
+    const stalledCount = rows.filter((r) => r.stalled).length;
+    const avgPct = rows.length ? Math.round(mean(rows.map((r) => r.pct))) : 0;
+    setSummary("people", rows.length
+      ? `${rows.length} ${rows.length === 1 ? "trainee" : "trainees"} · ${avgPct}% average completion` +
+        (stalledCount ? ` · ${stalledCount} stalled` : "")
+      : "nobody signed in yet");
 
     const search = document.getElementById("an-people-search");
     const storeSel = document.getElementById("an-people-store");
@@ -461,7 +728,8 @@
       const table = document.createElement("table");
       table.className = "tracker-table an-table an-people-table";
       table.innerHTML = `<thead><tr>
-        <th>Trainee</th><th>Store</th><th>Progress</th><th>Practice</th><th>Last active</th>
+        <th>Trainee</th><th>Store</th><th>Progress</th><th>Practice</th>
+        <th>Time on task</th><th>Last active</th>
       </tr></thead>`;
       const tbody = document.createElement("tbody");
 
@@ -489,11 +757,26 @@
              <div class="an-sub">${r.practiceCount} rep${r.practiceCount === 1 ? "" : "s"}${r.voiceCount ? ` · ${r.voiceCount} spoken` : ""}</div>`
           : `<span style="color:#aaa">—</span>`;
 
-        const lastTd = document.createElement("td");
-        lastTd.textContent = r.lastActive
-          ? new Date(r.lastActive).toLocaleDateString() : "—";
+        // Time on task: total active minutes, then the shape of the effort —
+        // how many separate days, any current streak, and what they train on.
+        const engTd = document.createElement("td");
+        const engBits = [];
+        if (r.daysActive) engBits.push(`${r.daysActive} day${r.daysActive === 1 ? "" : "s"} active`);
+        if (r.streak > 1) engBits.push(`${r.streak}-day streak`);
+        if (r.deviceMix) engBits.push(r.deviceMix);
+        engTd.innerHTML = r.activeMs
+          ? `<strong>${esc(fmtDur(r.activeMs))}</strong>
+             <div class="an-sub">${esc(engBits.join(" · ") || "—")}</div>`
+          : `<span style="color:#aaa">—</span>${engBits.length
+              ? `<div class="an-sub">${esc(engBits.join(" · "))}</div>` : ""}`;
 
-        [nameTd, storeTd, progTd, pracTd, lastTd].forEach((td) => tr.appendChild(td));
+        const lastTd = document.createElement("td");
+        lastTd.innerHTML = r.lastActive
+          ? `${esc(agoLabel(r.lastActive))}${r.stalled
+              ? '<div class="an-pill an-pill--idle">stalled</div>' : ""}`
+          : "—";
+
+        [nameTd, storeTd, progTd, pracTd, engTd, lastTd].forEach((td) => tr.appendChild(td));
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
@@ -530,8 +813,13 @@
     if (!events.length) {
       host.innerHTML = "";
       host.appendChild(el("div", "tracker-empty", "No activity recorded yet."));
+      setSummary("activity", "nothing recorded yet");
       return;
     }
+    const cut30 = Date.now() - 30 * 864e5;
+    const last30 = events.filter((ts) => new Date(ts).getTime() >= cut30).length;
+    setSummary("activity",
+      `${events.length} recorded action${events.length === 1 ? "" : "s"} · ${last30} in the last 30 days`);
 
     const byWeek = {};
     events.forEach((ts) => {
@@ -554,6 +842,200 @@
       });
     }
     vBarChart(host, rows.slice(-26), { ariaLabel: "Recorded events per week" });
+  }
+
+  // ---------------------------------------------------------------------
+  // How people train — device, visit length, and timing.
+  //
+  // Device and visit length only exist from the day session tracking shipped,
+  // so the scope line says so out loud rather than letting a thin chart read
+  // as "nobody trains".
+  const DEVICE_ORDER = ["phone", "tablet", "desktop"];
+  const DEVICE_LABEL = { phone: "Phone", tablet: "Tablet", desktop: "Desktop" };
+  const LEN_BUCKETS = [
+    { label: "<2m", max: 2 },
+    { label: "2–5m", max: 5 },
+    { label: "5–10m", max: 10 },
+    { label: "10–20m", max: 20 },
+    { label: "20–45m", max: 45 },
+    { label: "45m+", max: Infinity },
+  ];
+
+  function renderHabits(sessions, trainees) {
+    sessions = sessions || [];
+    const scope = document.getElementById("an-habits-scope");
+    const kpis = document.getElementById("an-habits-kpis");
+    const deviceHost = document.getElementById("an-device");
+    const lenHost = document.getElementById("an-session-len");
+    if (!kpis) return;
+
+    if (!sessions.length) {
+      if (scope) {
+        scope.innerHTML = "Visit tracking is live but nothing has been recorded yet — " +
+          "this fills in from the next time somebody opens a module. It only covers visits " +
+          "from the day tracking shipped, so it will stay thin for a while even though the " +
+          "rest of the page covers the whole history.";
+      }
+      kpis.innerHTML = "";
+      [deviceHost, lenHost].forEach((h) => {
+        if (!h) return;
+        h.innerHTML = "";
+        h.appendChild(el("div", "tracker-empty", "No visits recorded yet."));
+      });
+      setSummary("habits", "no visits recorded yet");
+      return;
+    }
+
+    const first = sessions.map((s) => s.started_at).filter(Boolean).sort()[0];
+    if (scope && first) {
+      scope.innerHTML =
+        `Device and visit length, recorded per visit since <strong>${esc(new Date(first).toLocaleDateString())}</strong> — ` +
+        "earlier training predates this tracking and isn't counted here. Durations are <em>active</em> " +
+        "time: the clock only runs while someone is on the page and using it, so a tab left open over " +
+        "a break isn't counted as training.";
+    }
+
+    const durations = sessions.map((s) => Number(s.active_ms) || 0).filter((m) => m > 0);
+    const totalMs = durations.reduce((a, b) => a + b, 0);
+    const people = new Set(sessions.map((s) => s.trainee_id).filter(Boolean));
+    const phone = sessions.filter((s) => s.device === "phone").length;
+
+    const grid = el("div", "tracker-stats");
+    grid.appendChild(statTile(fmtDur(median(durations)), "Median visit",
+      durations.length ? `${durations.length} visit${durations.length === 1 ? "" : "s"} timed` : "none timed"));
+    grid.appendChild(statTile(fmtDur(totalMs), "Total time on task",
+      people.size ? `across ${people.size} ${people.size === 1 ? "person" : "people"}` : ""));
+    grid.appendChild(statTile(
+      sessions.length ? Math.round(phone / sessions.length * 100) + "%" : "—",
+      "On a phone", `${phone} of ${sessions.length} visits`));
+    grid.appendChild(statTile(
+      people.size ? (sessions.length / people.size).toFixed(1) : "—",
+      "Visits per person", "since tracking started"));
+    kpis.innerHTML = "";
+    kpis.appendChild(grid);
+
+    setSummary("habits",
+      `median visit ${fmtDur(median(durations))} · ` +
+      `${sessions.length ? Math.round(phone / sessions.length * 100) : 0}% on a phone · ` +
+      `${fmtDur(totalMs)} total`);
+
+    // Device split — single hue. Three named categories whose job is "how
+    // much", so magnitude, not identity; the labels carry the identity.
+    const byDevice = {};
+    sessions.forEach((s) => {
+      const d = DEVICE_ORDER.indexOf(s.device) !== -1 ? s.device : "desktop";
+      byDevice[d] = (byDevice[d] || 0) + 1;
+    });
+    hBarChart(deviceHost, DEVICE_ORDER.map((d) => ({
+      label: DEVICE_LABEL[d],
+      value: byDevice[d] || 0,
+      display: byDevice[d] || 0,
+      tip: `<strong>${DEVICE_LABEL[d]}</strong><br>${byDevice[d] || 0} of ${sessions.length} visits`,
+    })), { empty: "No visits recorded yet." });
+
+    // Visit length distribution.
+    const buckets = LEN_BUCKETS.map((b) => ({ label: b.label, fullLabel: b.label, value: 0 }));
+    durations.forEach((ms) => {
+      const mins = ms / 60000;
+      const idx = LEN_BUCKETS.findIndex((b) => mins < b.max);
+      buckets[idx === -1 ? buckets.length - 1 : idx].value++;
+    });
+    buckets.forEach((b) => {
+      b.tip = `<strong>${b.label}</strong><br>${b.value} visit${b.value === 1 ? "" : "s"}`;
+    });
+    vBarChart(lenHost, buckets, {
+      ariaLabel: "Distribution of visit lengths",
+      empty: "No timed visits yet.",
+    });
+  }
+
+  // ---------------------------------------------------------------------
+  // When people train — day of week × 2-hour block, in the viewer's own
+  // timezone. Built from EVERY recorded event, not just sessions, so it works
+  // retroactively over the whole history instead of only since tracking
+  // shipped. Sequential single hue (never a rainbow) because the value is
+  // magnitude; the peak is also named in text underneath so the finding is
+  // never colour-only.
+  const DAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const HEAT_STEPS = [0.08, 0.24, 0.44, 0.66, 0.9];
+
+  function renderWhen(progress, quizzes, practice, ratings, sessions) {
+    const host = document.getElementById("an-when");
+    const peakHost = document.getElementById("an-when-peak");
+    if (!host) return;
+
+    const stamps = []
+      .concat(progress.map((p) => p.completed_at))
+      .concat((quizzes || []).map((q) => q.created_at))
+      .concat((practice || []).map((p) => p.created_at))
+      .concat((ratings || []).map((r) => r.created_at))
+      .concat((sessions || []).map((s) => s.started_at))
+      .filter(Boolean);
+
+    host.innerHTML = "";
+    if (peakHost) peakHost.textContent = "";
+    if (!stamps.length) {
+      host.appendChild(el("div", "tracker-empty", "No activity recorded yet."));
+      return;
+    }
+
+    const grid = {};      // "day|block" -> count
+    let max = 0;
+    stamps.forEach((ts) => {
+      const d = new Date(ts);
+      const day = (d.getDay() + 6) % 7;         // Monday = 0, local time
+      const block = Math.floor(d.getHours() / 2); // 12 two-hour blocks
+      const k = day + "|" + block;
+      grid[k] = (grid[k] || 0) + 1;
+      if (grid[k] > max) max = grid[k];
+    });
+
+    const wrap = el("div", "an-heat");
+    const table = el("div", "an-heat-grid");
+    for (let day = 0; day < 7; day++) {
+      table.appendChild(el("div", "an-heat-daylabel", DAY_LABELS[day]));
+      for (let b = 0; b < 12; b++) {
+        const n = grid[day + "|" + b] || 0;
+        const cell = el("div", "an-heat-cell");
+        if (n) {
+          const step = Math.min(HEAT_STEPS.length - 1,
+            Math.floor((n / max) * HEAT_STEPS.length - 0.0001));
+          cell.style.background = `rgba(154, 83, 46, ${HEAT_STEPS[Math.max(step, 0)]})`;
+        }
+        const from = String(b * 2).padStart(2, "0");
+        const to = String(b * 2 + 2).padStart(2, "0");
+        wireTip(host, cell,
+          `<strong>${DAY_LABELS[day]} ${from}:00–${to}:00</strong><br>${n} action${n === 1 ? "" : "s"}`);
+        table.appendChild(cell);
+      }
+    }
+    // Hour ruler under the grid: every 4 hours, so labels never collide.
+    table.appendChild(el("div", "an-heat-daylabel", ""));
+    for (let b = 0; b < 12; b++) {
+      table.appendChild(el("div", "an-heat-hour", b % 2 === 0 ? String(b * 2) : ""));
+    }
+    wrap.appendChild(table);
+
+    const legend = el("div", "an-heat-legend");
+    legend.appendChild(el("span", "an-heat-legend-text", "less"));
+    HEAT_STEPS.forEach((a) => {
+      const sw = el("span", "an-heat-swatch");
+      sw.style.background = `rgba(154, 83, 46, ${a})`;
+      legend.appendChild(sw);
+    });
+    legend.appendChild(el("span", "an-heat-legend-text", "more"));
+    wrap.appendChild(legend);
+    host.appendChild(wrap);
+
+    if (peakHost) {
+      const best = Object.keys(grid).sort((a, b) => grid[b] - grid[a])[0];
+      const [day, block] = best.split("|").map(Number);
+      const from = String(block * 2).padStart(2, "0");
+      const to = String(block * 2 + 2).padStart(2, "0");
+      peakHost.textContent =
+        `Busiest window: ${DAY_LABELS[day]} ${from}:00–${to}:00 (${grid[best]} of ${stamps.length} recorded actions). ` +
+        `Times are your browser's local timezone.`;
+    }
   }
 
   // ---------------------------------------------------------------------
@@ -605,6 +1087,10 @@
     const scroll = el("div", "an-table-scroll");
     scroll.appendChild(table);
     host.appendChild(scroll);
+
+    const started = ACADEMY_ORDER.filter((slug) =>
+      progress.some((p) => p.academy === slug)).length;
+    setSummary("academies", `${started} of ${ACADEMY_ORDER.length} academies started`);
   }
 
   // ---------------------------------------------------------------------
@@ -634,6 +1120,17 @@
         });
       }
       hBarChart(host, rows, { empty: "Nobody has completed a module in this academy yet." });
+
+      // The point of this chart is the cliff, so the collapsed header names it.
+      let drop = null;
+      for (let i = 1; i < rows.length; i++) {
+        const d = rows[i - 1].value - rows[i].value;
+        if (d > 0 && (!drop || d > drop.size)) drop = { size: d, at: i + 1 };
+      }
+      setSummary("funnel", rows.some((r) => r.value)
+        ? (drop ? `${conf.label} · biggest drop at module ${drop.at}`
+                : `${conf.label} · no drop-off yet`)
+        : `${conf.label} · nothing completed yet`);
     }
     draw();
   }
@@ -653,6 +1150,12 @@
     const retryRate = Object.keys(retried).length
       ? Math.round(Object.values(retried).filter((n) => n > 1).length / Object.keys(retried).length * 100)
       : 0;
+
+    setSummary("practice", practice.length
+      ? `${practice.length} rep${practice.length === 1 ? "" : "s"}` +
+        (graded.length ? ` · avg ${fmt(mean(graded.map((p) => p.score)))} / 5` : " · none graded") +
+        (practice.length ? ` · ${Math.round(voice / practice.length * 100)}% spoken` : "")
+      : "no practice reps yet");
 
     const grid = el("div", "tracker-stats");
     grid.appendChild(statTile(practice.length, "Total reps",
@@ -721,6 +1224,170 @@
   }
 
   // ---------------------------------------------------------------------
+  // AI token use.
+  //
+  // Deliberately tokens only, no currency. Token counts are facts reported by
+  // the API on every call; a dollar figure would be this page guessing at a
+  // rate card that changes, and the metering that matters already lives in the
+  // Anthropic console. What this answers is the question the console can't:
+  // WHERE the tokens went — which feature, which week, which trainee.
+  const KIND_LABEL = { grade: "Practice grading", ask: "Ask the Founder" };
+
+  function rowTokens(r) {
+    return (r.input_tokens || 0) + (r.output_tokens || 0) +
+           (r.cache_read_tokens || 0) + (r.cache_write_tokens || 0);
+  }
+  // Keep one decimal up to 100K. Rounding 15,500 to "16K" implies precision the
+  // number doesn't have and makes two different weeks look identical; past 100K
+  // the decimal stops carrying information. Trailing ".0" is dropped, so 14,000
+  // reads "14K" rather than "14.0K".
+  function fmtTokens(n) {
+    if (!n) return "0";
+    const trim = (x) => x.replace(/\.0$/, "");
+    if (n >= 1e7) return Math.round(n / 1e6) + "M";
+    if (n >= 1e6) return trim((n / 1e6).toFixed(1)) + "M";
+    if (n >= 1e5) return Math.round(n / 1000) + "K";
+    if (n >= 1000) return trim((n / 1000).toFixed(1)) + "K";
+    return String(Math.round(n));
+  }
+
+  function renderTokens(usage, trainees) {
+    usage = usage || [];
+    const kpis = document.getElementById("an-tokens-kpis");
+    const splitHost = document.getElementById("an-token-split");
+    const trendHost = document.getElementById("an-token-trend");
+    const peopleHost = document.getElementById("an-token-people");
+    const noteHost = document.getElementById("an-token-note");
+    if (!kpis) return;
+
+    if (!usage.length) {
+      kpis.innerHTML = "";
+      [splitHost, trendHost, peopleHost].forEach((h) => {
+        if (!h) return;
+        h.innerHTML = "";
+        h.appendChild(el("div", "tracker-empty",
+          "No AI calls logged yet — this fills in from the next graded practice answer or founder question."));
+      });
+      if (noteHost) noteHost.textContent = "";
+      setSummary("tokens", "nothing logged yet");
+      return;
+    }
+
+    const total = usage.reduce((s, r) => s + rowTokens(r), 0);
+    const failed = usage.filter((r) => r.ok === false).length;
+    const gradeRows = usage.filter((r) => r.kind === "grade");
+    const perGrade = gradeRows.length
+      ? gradeRows.reduce((s, r) => s + rowTokens(r), 0) / gradeRows.length : null;
+    const people = new Set(usage.map((r) => r.trainee_id).filter(Boolean));
+
+    const grid = el("div", "tracker-stats");
+    grid.appendChild(statTile(fmtTokens(total), "Tokens used",
+      `${usage.length} AI call${usage.length === 1 ? "" : "s"}` +
+      (failed ? ` · ${failed} failed` : "")));
+    grid.appendChild(statTile(perGrade === null ? "—" : fmtTokens(perGrade),
+      "Per graded answer", `${gradeRows.length} graded`));
+    grid.appendChild(statTile(
+      people.size ? fmtTokens(total / people.size) : "—",
+      "Per trainee", people.size ? `across ${people.size}` : "not attributed yet"));
+    const outTok = usage.reduce((s, r) => s + (r.output_tokens || 0), 0);
+    grid.appendChild(statTile(
+      total ? Math.round(outTok / total * 100) + "%" : "—",
+      "Returned by the model", "the rest is what we send it"));
+    kpis.innerHTML = "";
+    kpis.appendChild(grid);
+
+    setSummary("tokens",
+      `${fmtTokens(total)} tokens · ${usage.length} call${usage.length === 1 ? "" : "s"}` +
+      (perGrade === null ? "" : ` · ${fmtTokens(perGrade)} per graded answer`));
+
+    // Where it goes — by feature, then the sent/returned split. The split is
+    // the actionable half: the grading prompt ships the whole module text as
+    // `taught` on every rep, which is why "sent" dominates.
+    const byKind = {};
+    usage.forEach((r) => {
+      const k = r.kind || "other";
+      (byKind[k] = byKind[k] || { tokens: 0, calls: 0 });
+      byKind[k].tokens += rowTokens(r);
+      byKind[k].calls++;
+    });
+    const sumIn = total - outTok;
+    const splitRows = Object.keys(byKind)
+      .sort((a, b) => byKind[b].tokens - byKind[a].tokens)
+      .map((k) => ({
+        label: KIND_LABEL[k] || k,
+        value: byKind[k].tokens,
+        display: fmtTokens(byKind[k].tokens),
+        tip: `<strong>${esc(KIND_LABEL[k] || k)}</strong><br>${byKind[k].calls} call${byKind[k].calls === 1 ? "" : "s"}` +
+             `<br>${fmtTokens(byKind[k].tokens)} tokens`,
+      }))
+      .concat([
+        { label: "— sent to the model", value: sumIn, display: fmtTokens(sumIn),
+          tip: `<strong>Sent to the model</strong><br>${fmtTokens(sumIn)} tokens<br>Prompt, module text and the answer being graded.` },
+        { label: "— returned", value: outTok, display: fmtTokens(outTok),
+          tip: `<strong>Returned by the model</strong><br>${fmtTokens(outTok)} tokens<br>Scores and feedback.` },
+      ]);
+    hBarChart(splitHost, splitRows, { empty: "No AI calls logged yet." });
+
+    // Weekly trend
+    const byWeek = {};
+    usage.forEach((r) => {
+      if (!r.created_at) return;
+      const k = isoWeekStart(r.created_at).toISOString().slice(0, 10);
+      byWeek[k] = (byWeek[k] || 0) + rowTokens(r);
+    });
+    const weeks = Object.keys(byWeek).sort();
+    const trendRows = [];
+    if (weeks.length) {
+      const start = new Date(weeks[0]);
+      const end = isoWeekStart(Date.now());
+      for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 7)) {
+        const k = d.toISOString().slice(0, 10);
+        const label = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        trendRows.push({
+          label: trendRows.length % 2 === 0 ? label : "",
+          fullLabel: "Week of " + label,
+          value: byWeek[k] || 0,
+          tip: `<strong>Week of ${label}</strong><br>${fmtTokens(byWeek[k] || 0)} tokens`,
+        });
+      }
+    }
+    vBarChart(trendHost, trendRows.slice(-26), {
+      ariaLabel: "Tokens used per week", empty: "No AI calls logged yet.",
+    });
+
+    // Per trainee
+    const nameById = {};
+    (trainees || []).forEach((t) => { nameById[t.id] = t.name || "(no name)"; });
+    const byPerson = {};
+    usage.forEach((r) => {
+      const key = r.trainee_id || "__none";
+      (byPerson[key] = byPerson[key] || { tokens: 0, calls: 0 });
+      byPerson[key].tokens += rowTokens(r);
+      byPerson[key].calls++;
+    });
+    const personRows = Object.keys(byPerson)
+      .map((id) => {
+        const name = id === "__none" ? "Not attributed" : (nameById[id] || "(unknown trainee)");
+        return {
+          label: name,
+          value: byPerson[id].tokens,
+          display: fmtTokens(byPerson[id].tokens),
+          tip: `<strong>${esc(name)}</strong><br>${byPerson[id].calls} call${byPerson[id].calls === 1 ? "" : "s"}` +
+               `<br>${fmtTokens(byPerson[id].tokens)} tokens` +
+               (id === "__none" ? "<br>Founder questions aren't tied to a person." : ""),
+        };
+      })
+      .sort((a, b) => b.value - a.value);
+    hBarChart(peopleHost, personRows, { empty: "No AI calls logged yet." });
+
+    if (noteHost) {
+      noteHost.textContent =
+        "Counts are reported by the API on each call and logged server-side, so they're actual usage, " +
+        "not an estimate. Billing lives in the Anthropic console — this page answers where the tokens went.";
+    }
+  }
+
+  // ---------------------------------------------------------------------
   const RATING_QS = [
     ["q_useful", "Learned something usable"],
     ["q_confident", "Feel more confident"],
@@ -745,6 +1412,10 @@
     ratings.forEach((r) => RATING_QS.forEach(([k]) => {
       if (typeof r[k] === "number") pooled.push(r[k]);
     }));
+    setSummary("ratings", pooled.length
+      ? `${ratings.length} rating${ratings.length === 1 ? "" : "s"} · ` +
+        `${Math.round(pooled.filter((v) => v >= 4).length / pooled.length * 100)}% rated 4–5`
+      : "no ratings yet");
     const dist = [1, 2, 3, 4, 5].map((n) => {
       const count = pooled.filter((v) => v === n).length;
       const pct = pooled.length ? Math.round(count / pooled.length * 100) : 0;
@@ -786,8 +1457,10 @@
     host.innerHTML = "";
     if (!asks.length) {
       host.appendChild(el("div", "tracker-empty", "Nobody has asked the founder anything yet."));
+      setSummary("asks", "none asked yet");
       return;
     }
+    setSummary("asks", `${asks.length} question${asks.length === 1 ? "" : "s"} asked`);
     const counts = {};
     asks.forEach((a) => {
       const q = (a.question || "").trim();
@@ -841,6 +1514,11 @@
       .map(([label, value]) => ({ label, value }))
       .sort((a, b) => b.value - a.value);
     hBarChart(document.getElementById("an-by-role"), roleRows, { empty: "No roles yet." });
+
+    const storeCount = Object.keys(stores).length;
+    setSummary("stores", trainees.length
+      ? `${storeCount} store${storeCount === 1 ? "" : "s"} · ${roleRows.length} role${roleRows.length === 1 ? "" : "s"}`
+      : "nobody signed in yet");
   }
 
   window.KnoopsAnalytics = { init };
