@@ -169,6 +169,25 @@ alone as a standalone report — it force-expands the section and any capped
 table first, then puts both back, because a printed report that silently omits
 rows is worse than no report.
 
+## ⚠️ Cache busting — bump `?v=` when you change a .js or .css file
+
+Every `<script src>` and `<link href>` in every page carries `?v=YYYYMMDDx`
+(currently `v=20260916b`). **When you change any `.js` or `.css` file, bump that
+string in every HTML page in the same commit.**
+
+This is not housekeeping — it fixes a real failure that happened on Sept 16,
+2026. `.htaccess` caches CSS for an hour but sets no cache header on JS at all,
+so a browser that had loaded the page earlier paired **fresh JavaScript with an
+hour-old stylesheet**. The JS built the new collapsible headers and the
+heatmap grid; the old CSS had no rules for either, so headers rendered as bare
+outlined buttons and the heatmap collapsed into a vertical list of day names. It
+looked like a broken deploy. It was a half-loaded one — the worst kind, because
+a hard refresh fixes it for whoever thinks to try and nobody else.
+
+Changing the query string changes the URL, so old and new can never be paired
+again, and nobody has to know to hard-refresh. One find-and-replace of the
+version string across the HTML files does it.
+
 ## Where this is hosted (updated Sept 4, 2026)
 
 **Live at https://knoops.oneteamos.com** — served from Namecheap shared hosting

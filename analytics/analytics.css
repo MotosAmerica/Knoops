@@ -207,21 +207,22 @@
 .an-footer { margin-top: 48px; font-size: 0.76rem; color: #aaa; }
 
 /* ---- per-section print ---- */
+/* Always visible, never hover-to-reveal.
+   It started as reveal-on-hover and that was wrong twice over: on a phone
+   there is no hover, so the control simply didn't exist; and on a desktop
+   nobody hovers a heading to discover a feature they don't know is there.
+   Quiet and present beats hidden and clever. */
 .an-print {
   flex: 0 0 auto; align-self: center;
   background: none; border: 1px solid rgba(154, 83, 46, 0.3);
-  border-radius: 999px; padding: 3px 11px; cursor: pointer;
+  border-radius: 999px; padding: 6px 13px; min-height: 30px; cursor: pointer;
   font-family: var(--knoops-font); font-size: 0.72rem; font-weight: 600;
-  color: var(--knoops-brown);
-  opacity: 0; transition: opacity 0.12s ease;
+  color: var(--knoops-brown); opacity: 0.75;
+  transition: opacity 0.12s ease, background 0.12s ease;
 }
-/* Kept out of the way until wanted, but never hidden from keyboards or touch
-   (no hover there) — hence focus-within and the coarse-pointer rule below. */
-.an-section:hover .an-print,
-.an-section:focus-within .an-print { opacity: 1; }
-.an-print:hover { background: rgba(154, 83, 46, 0.08); }
+.an-section:hover .an-print { opacity: 1; }
+.an-print:hover { background: rgba(154, 83, 46, 0.08); opacity: 1; }
 .an-print:focus-visible { opacity: 1; outline: 2px solid var(--knoops-brown); outline-offset: 2px; }
-@media (hover: none) { .an-print { opacity: 1; } }
 
 .an-print-stamp { display: none; }
 
@@ -279,6 +280,8 @@
      into an ellipsis. Drop it onto its own line, indented past the chevron. */
   .an-head { flex-wrap: wrap; }
   .an-head-title { font-size: 1.12rem; flex: 1 1 auto; }
+  /* A 20px chip is not a thumb target. */
+  .an-print { min-height: 38px; padding: 8px 15px; font-size: 0.75rem; opacity: 1; }
   .an-head-summary {
     flex: 1 1 100%; white-space: normal; padding-left: 19px; margin-top: 3px;
   }
