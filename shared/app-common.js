@@ -103,18 +103,63 @@
   // text box, and nothing else about the flow changes.
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+  // iOS — including Chrome, Edge and Firefox on iOS, which are all WebKit
+  // underneath, so they behave identically to Safari.
+  const IS_IOS = /iPad|iPhone|iPod/.test(navigator.userAgent || "") ||
+    (navigator.platform === "MacIntel" && (navigator.maxTouchPoints || 0) > 1);
+
+  // What went wrong, in words a Knoopologist on a break can act on. The
+  // service-not-allowed case is the one that actually bites on iPhones: it is
+  // what WebKit reports when system Dictation is switched off, and the message
+  // has to name that setting or nobody will ever guess it.
+  function micErrorMessage(code) {
+    if (code === "aborted") return "";
+    if (code === "not-allowed") {
+      return IS_IOS
+        ? "Safari is blocking the mic for this site. Tap “aA” in the address bar → Website Settings → Microphone → Allow, then try again. You can type your answer instead."
+        : "Mic access is blocked for this site — allow it in your browser's address bar, or type your answer instead.";
+    }
+    if (code === "service-not-allowed") {
+      return IS_IOS
+        ? "iPhone speech recognition is switched off. Go to Settings → General → Keyboard and turn on Dictation, then come back and reload. You can type your answer in the meantime."
+        : "Speech recognition isn't available in this browser — you can type your answer instead.";
+    }
+    if (code === "audio-capture") return "No microphone found — you can type your answer instead.";
+    if (code === "network") return "Speech recognition needs a connection right now — you can type your answer instead.";
+    return "The mic didn't work that time — tap it to try again, or type your answer.";
+  }
+
   // Shared dictation wiring, used by both the practice card and the rating
   // comment box. Appends final transcripts to whatever's already in the
   // textarea and leaves it editable, so a mis-heard word can be fixed before
   // submitting. Returns a controller with stop() and an isListening() flag.
+  //
+  // TWO THINGS THIS HAS TO WORK AROUND ON iOS:
+  //
+  // 1. `continuous = true` is not honoured by WebKit. Recognition ends after a
+  //    single utterance, so on an iPhone the mic would light up, catch the
+  //    first sentence, and quietly stop — which reads to the trainee as "voice
+  //    is broken". We run single-shot there and restart it ourselves for as
+  //    long as they still want to be listening. `interimResults` is likewise
+  //    unreliable on WebKit, so iOS relies on final results only.
+  // 2. Failures are silent. WebKit can report service-not-allowed (Dictation
+  //    switched off in iOS Settings) or fire nothing at all. Every error now
+  //    surfaces a message, and a watchdog catches the case where start()
+  //    resolves but recognition never actually begins.
   function attachDictation(textarea, btn, opts) {
     opts = opts || {};
     const idleLabel = opts.idleLabel || "Tap to answer out loud";
     const busyLabel = opts.busyLabel || "Listening… tap to stop";
     const labelEl = () => btn.querySelector(".mic-label");
+
     let recognizer = null;
-    let listening = false;
+    let listening = false;   // what the UI is showing
+    let want = false;        // what the trainee asked for; survives iOS restarts
     let usedVoice = false;
+    let baseText = "";       // transcript so far, kept across iOS restarts
+    let restarts = 0;
+    let quietRuns = 0;       // consecutive restarts that heard nothing
+    let watchdog = null;
 
     const setListening = (on) => {
       listening = on;
@@ -122,43 +167,113 @@
       const l = labelEl();
       if (l) l.textContent = on ? busyLabel : idleLabel;
     };
+    const report = (msg) => { if (msg && opts.onError) opts.onError(msg); };
+    const clearWatchdog = () => { if (watchdog) { clearTimeout(watchdog); watchdog = null; } };
 
-    btn.addEventListener("click", () => {
-      if (listening && recognizer) { recognizer.stop(); return; }
-      try {
-        recognizer = new SpeechRec();
-      } catch (e) {
-        btn.style.display = "none";
-        return;
-      }
-      recognizer.lang = navigator.language || "en-GB";
-      recognizer.interimResults = true;
-      recognizer.continuous = true;
-      let finalText = textarea.value ? textarea.value + " " : "";
+    function halt(msg) {
+      want = false;
+      clearWatchdog();
+      setListening(false);
+      report(msg);
+    }
 
-      recognizer.onresult = (ev) => {
+    function build() {
+      const r = new SpeechRec();
+      r.lang = navigator.language || "en-GB";
+      r.continuous = !IS_IOS;
+      r.interimResults = !IS_IOS;
+
+      r.onstart = () => { clearWatchdog(); };
+
+      r.onresult = (ev) => {
         let interim = "";
         for (let i = ev.resultIndex; i < ev.results.length; i++) {
           const chunk = ev.results[i][0].transcript;
-          if (ev.results[i].isFinal) { finalText += chunk + " "; usedVoice = true; }
-          else interim += chunk;
+          if (ev.results[i].isFinal) {
+            baseText += chunk + " ";
+            usedVoice = true;
+            quietRuns = 0;
+          } else {
+            interim += chunk;
+          }
         }
-        textarea.value = (finalText + interim).replace(/\s+/g, " ").trimStart();
+        textarea.value = (baseText + interim).replace(/\s+/g, " ").trimStart();
         if (opts.onInput) opts.onInput();
       };
-      recognizer.onerror = (ev) => {
-        setListening(false);
-        if (opts.onError && (ev.error === "not-allowed" || ev.error === "service-not-allowed")) {
-          opts.onError("Mic access is blocked — you can type instead.");
-        }
-      };
-      recognizer.onend = () => setListening(false);
 
-      try { recognizer.start(); setListening(true); } catch (e) { setListening(false); }
+      r.onerror = (ev) => {
+        clearWatchdog();
+        // Silence between sentences is normal in single-shot mode — let onend
+        // restart rather than treating a pause as a failure.
+        if (ev.error === "no-speech" && want && IS_IOS) return;
+        halt(micErrorMessage(ev.error));
+      };
+
+      r.onend = () => {
+        if (want && IS_IOS) {
+          quietRuns++;
+          // Three runs in a row with nothing heard means they've stopped
+          // talking (or it never really started) — don't loop on the mic.
+          if (quietRuns > 3 || restarts > 60) {
+            halt(usedVoice ? "" : "Didn't catch anything — tap the mic and speak again, or type your answer.");
+            return;
+          }
+          restarts++;
+          try {
+            recognizer = build();
+            recognizer.start();
+            return;
+          } catch (e) { /* fall through to stopping */ }
+        }
+        want = false;
+        setListening(false);
+      };
+      return r;
+    }
+
+    btn.addEventListener("click", () => {
+      if (want) {                       // tap again to stop
+        want = false;
+        try { if (recognizer) recognizer.stop(); } catch (e) {}
+        clearWatchdog();
+        setListening(false);
+        return;
+      }
+
+      baseText = textarea.value ? textarea.value + " " : "";
+      restarts = 0;
+      quietRuns = 0;
+      want = true;
+
+      // start() must be called synchronously inside the tap handler — iOS
+      // discards the user-gesture context across an await or a timeout.
+      try {
+        recognizer = build();
+        recognizer.start();
+        setListening(true);
+      } catch (e) {
+        halt("The mic didn't start — you can type your answer instead.");
+        return;
+      }
+
+      // If onstart never fires, recognition never really began. Without this
+      // the button just sits there saying "Listening…" forever.
+      clearWatchdog();
+      watchdog = setTimeout(() => {
+        if (!want) return;
+        try { if (recognizer) recognizer.stop(); } catch (e) {}
+        halt(IS_IOS
+          ? "The mic didn't start. Check Settings → General → Keyboard → Dictation is on, and allow microphone access for this site. You can type your answer instead."
+          : "The mic didn't start — you can type your answer instead.");
+      }, 3000);
     });
 
     return {
-      stop() { if (listening && recognizer) recognizer.stop(); },
+      stop() {
+        want = false;
+        clearWatchdog();
+        if (listening && recognizer) { try { recognizer.stop(); } catch (e) {} }
+      },
       isListening() { return listening; },
       usedVoice() { return usedVoice; },
     };
@@ -795,11 +910,14 @@
       const commentMic = el("button", "rating-mic");
       commentMic.type = "button";
       commentMic.innerHTML = `<span class="mic-icon">🎙</span><span class="mic-label">Say it instead</span>`;
+      const commentMicNote = el("div", "rating-mic-note");
       attachDictation(comment, commentMic, {
         idleLabel: "Say it instead",
         busyLabel: "Listening… tap to stop",
+        onError: (msg) => { commentMicNote.textContent = msg; },
       });
       wrap.appendChild(commentMic);
+      wrap.appendChild(commentMicNote);
     }
 
     const actions = el("div", "rating-actions");

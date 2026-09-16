@@ -534,3 +534,7 @@ a { color: var(--knoops-brown); }
   .tracker-filters { flex-direction: column; }
   .tracker-filters input, .tracker-filters select { width: 100%; }
 }
+
+/* Mic failure message under the rating comment box. Silent failure was the
+   original bug on iPhone: the button did nothing and said nothing. */
+.rating-mic-note { font-size: 0.82rem; color: #8a5a2b; margin-top: 6px; line-height: 1.45; }
