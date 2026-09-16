@@ -137,6 +137,38 @@ section itself rather than letting a thin chart read as "nobody trains". The
 *when-they-train* heatmap is the exception — it's built from every recorded
 action, so it covers the whole history.
 
+## AI token use (added Sept 16, 2026)
+
+`ai_usage` (migration `0006`) plus a `logUsage()` helper in the edge function
+(deployed as v9). Every Anthropic call — practice grading and Ask the Founder —
+logs what it consumed.
+
+- **Written server-side only.** The edge function is the only place that sees
+  real usage, and a browser can't forge a row it never writes.
+- **Tokens, never money.** Deliberate: billing is metered in the Anthropic
+  console, and a dollar figure here would be this page guessing at a rate card
+  that changes. What this answers is the question the console can't — *where*
+  the tokens went: which feature, which week, which trainee.
+- Failed calls log with `ok=false` rather than not logging. The tokens were
+  spent either way, and a misbehaving prompt whose cost is invisible is the
+  worst case.
+- `cache_read_tokens` / `cache_write_tokens` exist ahead of need. The grading
+  prompt ships the whole module as `taught` on every rep, which is exactly what
+  prompt caching is for; when that's turned on, the win shows up as cache reads
+  rising while input falls — and without the columns there'd be no before.
+- The practice grade call now sends `trainee` so spend can be attributed. It is
+  used for nothing else and the grader never sees it.
+
+## Analytics page: collapsible sections + print (Sept 16, 2026)
+
+Each section folds to its heading, and every collapsed header carries its own
+headline number, so the collapsed page is a one-screen summary rather than a
+filing cabinet. Open/closed persists per browser; `#key` in the URL opens that
+section. Each heading also has a **Print** control that prints that section
+alone as a standalone report — it force-expands the section and any capped
+table first, then puts both back, because a printed report that silently omits
+rows is worse than no report.
+
 ## Where this is hosted (updated Sept 4, 2026)
 
 **Live at https://knoops.oneteamos.com** — served from Namecheap shared hosting
